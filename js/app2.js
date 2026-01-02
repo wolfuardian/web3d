@@ -138,19 +138,21 @@ class App {
         const width = window.innerWidth;
         const height = window.innerHeight;
 
-        this.renderer.setScissorTest( true );
-
-        // Left side
-        this.renderer.setScissor( 0, 0, width / 2, height );
-        this.renderer.setViewport( 0, 0, width / 2, height );
         this.renderer.render( this.scene, this.camera );
 
-        // Right side
-        this.renderer.setScissor( width / 2, 0, width / 2, height );
-        this.renderer.setViewport( width / 2, 0, width / 2, height );
-        this.renderer.render( this.scene, this.camera );
-
-        this.renderer.setScissorTest( false );
+        // this.renderer.setScissorTest( true );
+        //
+        // // Left side
+        // this.renderer.setScissor( 0, 0, width / 2, height );
+        // this.renderer.setViewport( 0, 0, width / 2, height );
+        // this.renderer.render( this.scene, this.camera );
+        //
+        // // Right side
+        // this.renderer.setScissor( width / 2, 0, width / 2, height );
+        // this.renderer.setViewport( width / 2, 0, width / 2, height );
+        // this.renderer.render( this.scene, this.camera );
+        //
+        // this.renderer.setScissorTest( false );
     }
 
     inspect() {
