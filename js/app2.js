@@ -90,13 +90,15 @@ class App {
 
             switch ( object.type ) {
 
-                case 'Reference':
+                case 'Object3D':
+                    console.log('Reference')
 
                     if ( object.userData.src && object.userData.src.includes( ".glb" ) ) {
 
                         t.LoadGLBModel( object.userData.src, ( result ) => {
 
                             if ( result ) {
+
 
                                 this.scene.add( result );
 
