@@ -91,7 +91,7 @@ class App {
             switch ( object.type ) {
 
                 case 'Object3D':
-                    console.log('Reference')
+                    console.log( 'Reference' )
 
                     if ( object.userData.src && object.userData.src.includes( ".glb" ) ) {
 

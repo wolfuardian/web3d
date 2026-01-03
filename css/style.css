@@ -2,30 +2,30 @@
    深色科幻風 UI 面板樣式
    ========================================== */
 
-/* 基礎重置與全域設定 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/*!* 基礎重置與全域設定 *!*/
+/** {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    box-sizing: border-box;*/
+/*}*/
 
 body {
     background: #0a0e1a;
     font-family: 'Segoe UI', system-ui, sans-serif;
-    padding: 2rem;
-    color: rgba(255, 255, 255, 0.9);
-    min-height: 100vh;
+    /*padding: 2rem;*/
+    /*color: rgba(255, 255, 255, 0.9);*/
+    /*min-height: 100vh;*/
 }
 
 /* ==========================================
    面板容器佈局
    ========================================== */
 .panel-container {
-    max-width: 1200px;
+    /*max-width: 1200px;*/
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
+    /*grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));*/
+    /*gap: 2rem;*/
 }
 
 /* ==========================================
@@ -33,23 +33,22 @@ body {
    ========================================== */
 .sci-fi-panel {
     position: relative;
-    background: linear-gradient(135deg, rgba(13, 35, 61, 0.9), rgba(22, 22, 22, 0.95));
+    /*background: linear-gradient(135deg, rgba(13, 35, 61, 0.9), rgba(22, 22, 22, 0.95));*/
     border: 1px solid rgba(0, 180, 220, 0.3);
-    border-radius: 8px;
+    border-radius: 1px;
     padding: 1.5rem;
-    box-shadow:
-            0 0 20px rgba(0, 180, 220, 0.1),
-            inset 0 0 30px rgba(0, 180, 220, 0.05);
+    box-shadow: 0 0 20px rgba(0, 180, 220, 0.1),
+    inset 0 0 30px rgba(0, 180, 220, 0.05);
     overflow: hidden;
     transition: all 0.3s ease;
 }
 
 .sci-fi-panel:hover {
+    border-radius: 16px;
     border-color: rgba(0, 180, 220, 0.6);
-    box-shadow:
-            0 0 30px rgba(0, 180, 220, 0.2),
-            inset 0 0 40px rgba(0, 180, 220, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 180, 220, 0.2),
+    inset 0 0 40px rgba(0, 180, 220, 0.08);
+    /*transform: translateY(2px);*/
 }
 
 /* ==========================================
@@ -162,8 +161,12 @@ body {
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 /* ==========================================
@@ -258,30 +261,44 @@ body {
 /* ==========================================
    響應式設計
    ========================================== */
-@media (max-width: 768px) {
-    body {
-        padding: 1rem;
-    }
+/*@media (max-width: 768px) {*/
+/*    body {*/
+/*        padding: 1rem;*/
+/*    }*/
 
-    .panel-container {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
+/*    .panel-container {*/
+/*        grid-template-columns: 1fr;*/
+/*        gap: 1.5rem;*/
+/*    }*/
 
-    .sci-fi-panel {
-        padding: 1.2rem;
-    }
+/*    .sci-fi-panel {*/
+/*        padding: 1.2rem;*/
+/*    }*/
 
-    .panel-title {
-        font-size: 1rem;
-    }
-}
+/*    .panel-title {*/
+/*        font-size: 1rem;*/
+/*    }*/
+/*}*/
 
 /* ==========================================
    工具類別
    ========================================== */
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.w-full { width: 100%; }
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1rem;
+}
+
+.w-full {
+    width: 100%;
+}
