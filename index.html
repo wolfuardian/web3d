@@ -4,82 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>我的 Three.js 網站</title>
-    <!-- 引入外部 CSS 檔案 -->
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        canvas {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-
 </head>
 <body>
-<script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
-        }
-    }
+
+
+<script>
+    const version = new Date().getTime();
+    document.write( `<a href="game.html?v=${ version }">開始遊戲</a><br>` );
+    document.write( `<a href="3d.html?v=${ version }">3D測試</a>` );
 </script>
-
-<!-- 引用第一個模組 -->
-<!--<script type="module" src="./js/app1.js"></script>-->
-<!-- 外框元素 -->
-<div class="frame-border frame-top"></div>
-<div class="frame-border frame-right"></div>
-<div class="frame-border frame-bottom"></div>
-<div class="frame-border frame-left"></div>
-
-<!--<div class="panel-container">-->
-<!--    &lt;!&ndash;    &lt;!&ndash; 系統狀態面板 &ndash;&gt;&ndash;&gt;-->
-<!--    <div class="sci-fi-panel">-->
-<!--        &lt;!&ndash;        <div class="panel-corner corner-tl"></div>&ndash;&gt;-->
-<!--        &lt;!&ndash;        <div class="panel-corner corner-tr"></div>&ndash;&gt;-->
-<!--        &lt;!&ndash;        <div class="panel-corner corner-bl"></div>&ndash;&gt;-->
-<!--        &lt;!&ndash;        <div class="panel-corner corner-br"></div>&ndash;&gt;-->
-
-<!--&lt;!&ndash;        <div class="panel-header">&ndash;&gt;-->
-<!--&lt;!&ndash;            <h3 class="panel-title">系統狀態</h3>&ndash;&gt;-->
-<!--&lt;!&ndash;            <div class="status-indicator"></div>&ndash;&gt;-->
-<!--&lt;!&ndash;        </div>&ndash;&gt;-->
-
-<!--        &lt;!&ndash;        &lt;!&ndash;        <div class="panel-content">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            <div class="data-item">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-label">CPU 使用率</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-value">45.2%</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            <div class="progress-bar">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <div class="progress-fill" style="width: 45.2%"></div>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
-
-<!--        &lt;!&ndash;        &lt;!&ndash;            <div class="data-item">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-label">記憶體使用</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-value">6.8 GB / 16 GB</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            <div class="progress-bar">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <div class="progress-fill" style="width: 42.5%"></div>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
-
-<!--        &lt;!&ndash;        &lt;!&ndash;            <div class="data-item">&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-label">網路延遲</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;                <span class="data-value">12 ms</span>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
-<!--        &lt;!&ndash;        &lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
-<!--    </div>-->
-
-<!--</div>-->
-
-<!-- 加入版本號,每次更新時遞增 -->
-<script type="module" src="./js/app2.js?v=1.0.0+20260104+002"></script>
 
 </body>
 </html>

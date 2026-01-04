@@ -2,6 +2,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as t from './threeJS/functions.js';
 
+
+import { RhythmGame } from './Game.js';
+
+
 class App {
 
     constructor() {
@@ -159,4 +163,6 @@ class App {
     }
 }
 
+
 new App();
+new RhythmGame();
