@@ -2,17 +2,24 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>我的 Three.js 網站</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Three.js 互動式 3D 網頁應用">
+    <title>Three.js 互動展示 | 3D 網頁體驗</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<header>
+    <h1>Three.js 專案展示</h1>
+</header>
 
+<nav id="main-nav" class="navigation">
+    <!-- 導覽連結將由 JavaScript 動態生成 -->
+</nav>
 
-<script>
-    const version = new Date().getTime();
-    document.write( `<a href="game.html?v=${ version }">開始遊戲</a><br>` );
-    document.write( `<a href="3d.html?v=${ version }">3D測試</a>` );
-</script>
+<main id="content">
+    <!-- 主要內容區域 -->
+</main>
 
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

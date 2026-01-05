@@ -54,7 +54,7 @@ class App {
         const loader = new THREE.ObjectLoader();
 
         loader.load(
-            'scene/Scene.json',
+            '../scene/Scene.json',
             ( loadedScene ) => {
                 this.scene = loadedScene;
                 this.scene.updateMatrixWorld( true );
@@ -99,7 +99,7 @@ class App {
 
                     if ( object.userData.src && object.userData.src.includes( ".glb" ) ) {
 
-                        t.LoadGLBModel( object.userData.src, ( result ) => {
+                        t.LoadGLBModel( '../' + object.userData.src, ( result ) => {
 
                             if ( result ) {
 
