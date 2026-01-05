@@ -1,25 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Three.js 互動式 3D 網頁應用">
-    <title>Three.js 互動展示 | 3D 網頁體驗</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<header>
-    <h1>Three.js 專案展示</h1>
-</header>
+<html lang="zh-tw">
+    <head>
+        <title>Homepage - webgl</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link type="text/css" rel="stylesheet" href="css/main.css">
+    </head>
 
-<nav id="main-nav" class="navigation">
-    <!-- 導覽連結將由 JavaScript 動態生成 -->
-</nav>
+    <body>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+                }
+            }
+        </script>
 
-<main id="content">
-    <!-- 主要內容區域 -->
-</main>
 
-<script type="module" src="js/main.js"></script>
-</body>
+        <!--        <header>-->
+        <!--            <h1>Three.js 專案展示</h1>-->
+        <!--        </header>-->
+
+<!--                <nav id="main-nav" class="navigation"></nav>-->
+
+        <!--        <main id="content"></main>-->
+
+        <script type="module" src="js/pages/main.js"></script>
+    </body>
 </html>
