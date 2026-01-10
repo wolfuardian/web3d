@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <title>Timeline Demo</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="main.css">
+        <style>
+            body {
+                background: #1a1a1a;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                color: #ccc;
+            }
+        </style>
+    </head>
+    <body>
+        <div data-layout="vertical" data-fill style="background: #252525;">
+
+            <!-- 上：固定高度 -->
+            <div data-height="12%" style="background: #000;"></div>
+
+            <!-- 中：自動延展 -->
+            <div data-flex="1">
+                <!-- 你的內容 -->
+                <div data-timeline data-height="120px" data-bottom="12%"></div>
+
+
+            </div>
+
+            <!-- 下：百分比高度 -->
+            <div data-height="12%" style="background: #000;"></div>
+
+        </div>
+        <!-- 主布局：填滿視窗 -->
+        <!--        <div data-layout="vertical" data-fill>-->
+
+        <!--            &lt;!&ndash; 頂部列 &ndash;&gt;-->
+        <!--            <div data-layout="horizontal" data-height="48px" data-align="center" data-padding="0 16px"-->
+        <!--                 style="background: #252525; border-bottom: 1px solid #1a1a1a;">-->
+        <!--                <span style="font-weight: 600;">戰情中心 Demo</span>-->
+        <!--                <div data-spacer></div>-->
+        <!--                <span style="font-size: 12px; color: #888;">Layout + Panel 測試</span>-->
+        <!--            </div>-->
+
+
+        <!--        </div>-->
+
+
+        <script src="js/components/timeline.js"></script>
+
+
+        <script src="js/components/layout.js"></script>
+        <script src="js/components/panel.js"></script>
+        <script src="js/components/main.js"></script>
+
+
+        <div class="group horizontal">
+            <div class="group vertical">
+                <div class="slider" data-min="0" data-max="100"></div>
+                <div class="slider" data-min="0" data-max="1000"></div>
+            </div>
+            <div class="slider" data-min="-50" data-max="50"></div>
+        </div>
+
+        <div class="widget bordered shadow active">
+        </div>
+    </body>
+</html>
