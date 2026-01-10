@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nested Slider Groups</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: system-ui, sans-serif;
+                background: #1a1a2e;
+                color: #eee;
+                min-height: 100vh;
+                padding: 24px;
+            }
+
+            .group {
+                display: flex;
+                gap: 12px;
+                padding: 12px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .group.horizontal {
+                flex-direction: row;
+                align-items: stretch;
+            }
+
+            .group.vertical {
+                flex-direction: column;
+            }
+
+            .slider {
+                position: relative;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+                user-select: none;
+            }
+
+            /* Horizontal slider in horizontal group */
+            .group.horizontal > .slider {
+                width: 200px;
+                height: 32px;
+            }
+
+            /* Vertical slider in vertical group */
+            .group.vertical > .slider {
+                width: 32px;
+                height: 150px;
+            }
+
+            .slider .track {
+                position: absolute;
+                background: #4a5568;
+                border-radius: 2px;
+            }
+
+            .group.horizontal > .slider .track {
+                left: 8px;
+                right: 8px;
+                top: 50%;
+                height: 4px;
+                transform: translateY(-50%);
+            }
+
+            .group.vertical > .slider .track {
+                top: 8px;
+                bottom: 8px;
+                left: 50%;
+                width: 4px;
+                transform: translateX(-50%);
+            }
+
+            .slider .fill {
+                position: absolute;
+                background: #6366f1;
+                border-radius: 2px;
+            }
+
+            .group.horizontal > .slider .fill {
+                left: 8px;
+                top: 50%;
+                height: 4px;
+                transform: translateY(-50%);
+            }
+
+            .group.vertical > .slider .fill {
+                bottom: 8px;
+                left: 50%;
+                width: 4px;
+                transform: translateX(-50%);
+            }
+
+            .slider .thumb {
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                background: #6366f1;
+                border: 2px solid #fff;
+                border-radius: 50%;
+                cursor: grab;
+                transition: transform 0.1s, box-shadow 0.1s;
+            }
+
+            .slider .thumb:hover {
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+            }
+
+            .slider .thumb.dragging {
+                cursor: grabbing;
+                transform: translate(-50%, -50%) scale(1.15);
+                box-shadow: 0 0 16px rgba(99, 102, 241, 0.7);
+            }
+
+            .slider .value-label {
+                position: absolute;
+                font-size: 11px;
+                color: #aaa;
+                white-space: nowrap;
+            }
+
+            .group.horizontal > .slider .value-label {
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 4px;
+            }
+
+            .group.vertical > .slider .value-label {
+                left: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                margin-left: 8px;
+            }
+
+            .label {
+                font-size: 12px;
+                color: #888;
+                padding: 4px 8px;
+            }
+
+            h3 {
+                margin-bottom: 16px;
+                color: #6366f1;
+                font-weight: 500;
+            }
+
+            .demo-section {
+                margin-bottom: 32px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="demo-section">
+            <h3>Nested Groups Demo</h3>
+            <div class="group horizontal">
+                <div class="group vertical">
+                    <div class="label">Channel A</div>
+                    <div class="slider" data-min="0" data-max="100" data-value="30"></div>
+                    <div class="slider" data-min="0" data-max="100" data-value="60"></div>
+                    <div class="slider" data-min="0" data-max="100" data-value="45"></div>
+                </div>
+                <div class="group vertical">
+                    <div class="label">Channel B</div>
+                    <div class="slider" data-min="-50" data-max="50" data-value="0"></div>
+                    <div class="slider" data-min="0" data-max="1000" data-value="500"></div>
+                </div>
+                <div class="group vertical">
+                    <div class="label">Timeline</div>
+                    <div class="group horizontal">
+                        <div class="slider" data-min="0" data-max="60" data-value="15"></div>
+                        <div class="slider" data-min="0" data-max="60" data-value="30"></div>
+                    </div>
+                    <div class="group horizontal">
+                        <div class="slider" data-min="0" data-max="100" data-value="75"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            class Slider {
+                constructor( element ) {
+                    this.el = element;
+                    this.min = parseFloat( element.dataset.min ) || 0;
+                    this.max = parseFloat( element.dataset.max ) || 100;
+                    this.value = parseFloat( element.dataset.value ) || this.min;
+                    this.isVertical = element.closest( '.group.vertical' ) !== null
+                        && element.parentElement.classList.contains( 'vertical' );
+
+                    this.render();
+                    this.bindEvents();
+                    this.updatePosition();
+                }
+
+                render() {
+                    this.el.innerHTML = `
+          <div class="track"></div>
+          <div class="fill"></div>
+          <div class="thumb"></div>
+          <div class="value-label">${ this.value.toFixed( 0 ) }</div>
+        `;
+                    this.thumb = this.el.querySelector( '.thumb' );
+                    this.fill = this.el.querySelector( '.fill' );
+                    this.label = this.el.querySelector( '.value-label' );
+                }
+
+                bindEvents() {
+                    this.thumb.addEventListener( 'mousedown', ( e ) => this.startDrag( e ) );
+                    this.el.addEventListener( 'mousedown', ( e ) => {
+                        if ( e.target !== this.thumb ) this.jump( e );
+                    } );
+                }
+
+                startDrag( e ) {
+                    e.preventDefault();
+                    this.thumb.classList.add( 'dragging' );
+
+                    const onMove = ( e ) => this.drag( e );
+                    const onUp = () => {
+                        this.thumb.classList.remove( 'dragging' );
+                        document.removeEventListener( 'mousemove', onMove );
+                        document.removeEventListener( 'mouseup', onUp );
+                    };
+
+                    document.addEventListener( 'mousemove', onMove );
+                    document.addEventListener( 'mouseup', onUp );
+                }
+
+                drag( e ) {
+                    const rect = this.el.getBoundingClientRect();
+                    let ratio;
+
+                    if ( this.isVertical ) {
+                        ratio = 1 - ( e.clientY - rect.top - 8 ) / ( rect.height - 16 );
+                    } else {
+                        ratio = ( e.clientX - rect.left - 8 ) / ( rect.width - 16 );
+                    }
+
+                    ratio = Math.max( 0, Math.min( 1, ratio ) );
+                    this.value = this.min + ratio * ( this.max - this.min );
+                    this.el.dataset.value = this.value;
+                    this.updatePosition();
+
+                    this.el.dispatchEvent( new CustomEvent( 'slider-change', {
+                        detail: { value: this.value }
+                    } ) );
+                }
+
+                jump( e ) {
+                    this.drag( e );
+                }
+
+                updatePosition() {
+                    const ratio = ( this.value - this.min ) / ( this.max - this.min );
+
+                    if ( this.isVertical ) {
+                        const pos = 8 + ( 1 - ratio ) * ( this.el.offsetHeight - 16 );
+                        this.thumb.style.top = `${ pos }px`;
+                        this.thumb.style.left = '50%';
+                        this.thumb.style.transform = 'translate(-50%, -50%)';
+                        this.fill.style.height = `${ ratio * ( this.el.offsetHeight - 16 ) }px`;
+                    } else {
+                        const pos = 8 + ratio * ( this.el.offsetWidth - 16 );
+                        this.thumb.style.left = `${ pos }px`;
+                        this.thumb.style.top = '50%';
+                        this.thumb.style.transform = 'translate(-50%, -50%)';
+                        this.fill.style.width = `${ ratio * ( this.el.offsetWidth - 16 ) }px`;
+                    }
+
+                    this.label.textContent = this.value.toFixed( 0 );
+                }
+            }
+
+            // Initialize all sliders
+            document.querySelectorAll( '.slider' ).forEach( el => new Slider( el ) );
+        </script>
+    </body>
+</html>

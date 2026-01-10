@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Range Slider</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: system-ui, sans-serif;
+                background: #0f0f1a;
+                color: #eee;
+                min-height: 100vh;
+                padding: 48px;
+                display: flex;
+                flex-direction: column;
+                gap: 32px;
+            }
+
+            h3 {
+                color: #6366f1;
+                font-weight: 500;
+                margin-bottom: 8px;
+            }
+
+            .info {
+                font-size: 13px;
+                color: #888;
+                margin-bottom: 16px;
+            }
+
+            .range-slider {
+                position: relative;
+                height: 48px;
+                user-select: none;
+            }
+
+            .track {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 6px;
+                background: #2a2a3e;
+                border-radius: 3px;
+                transform: translateY(-50%);
+            }
+
+            .track-ticks {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 16px;
+                transform: translateY(-50%);
+                display: flex;
+                justify-content: space-between;
+                padding: 0 8px;
+                pointer-events: none;
+            }
+
+            .tick {
+                width: 1px;
+                height: 100%;
+                background: #3a3a4e;
+            }
+
+            .range-fill {
+                position: absolute;
+                top: 50%;
+                height: 6px;
+                background: linear-gradient(90deg, #6366f1, #8b5cf6);
+                border-radius: 3px;
+                transform: translateY(-50%);
+                cursor: grab;
+            }
+
+            .range-fill:hover {
+                background: linear-gradient(90deg, #818cf8, #a78bfa);
+            }
+
+            .range-fill.dragging {
+                cursor: grabbing;
+                background: linear-gradient(90deg, #818cf8, #a78bfa);
+            }
+
+            .handle {
+                position: absolute;
+                top: 50%;
+                width: 20px;
+                height: 20px;
+                background: #fff;
+                border: 3px solid #6366f1;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                cursor: ew-resize;
+                z-index: 10;
+                transition: transform 0.1s, box-shadow 0.1s;
+            }
+
+            .handle:hover {
+                transform: translate(-50%, -50%) scale(1.15);
+                box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+            }
+
+            .handle.dragging {
+                transform: translate(-50%, -50%) scale(1.2);
+                box-shadow: 0 0 16px rgba(99, 102, 241, 0.8);
+                border-color: #818cf8;
+            }
+
+            .handle-label {
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                color: #6366f1;
+                background: #1a1a2e;
+                padding: 2px 8px;
+                border-radius: 4px;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.15s;
+            }
+
+            .handle:hover .handle-label,
+            .handle.dragging .handle-label {
+                opacity: 1;
+            }
+
+            .labels {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 8px;
+                font-size: 11px;
+                color: #666;
+            }
+
+            .output {
+                margin-top: 24px;
+                padding: 16px;
+                background: #1a1a2e;
+                border-radius: 8px;
+                font-family: monospace;
+                font-size: 14px;
+            }
+
+            .output span {
+                color: #6366f1;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h3>Range Slider</h3>
+            <p class="info">拖曳兩端調整範圍，拖曳中間區塊整體移動</p>
+
+            <div class="range-slider" data-min="0" data-max="100" data-start="25" data-end="75">
+                <div class="track"></div>
+                <div class="track-ticks"></div>
+                <div class="range-fill"></div>
+                <div class="handle handle-start">
+                    <div class="handle-label"></div>
+                </div>
+                <div class="handle handle-end">
+                    <div class="handle-label"></div>
+                </div>
+            </div>
+            <div class="labels">
+                <span>0</span>
+                <span>25</span>
+                <span>50</span>
+                <span>75</span>
+                <span>100</span>
+            </div>
+
+            <div class="output">
+                Range: <span class="out-start">25</span> — <span class="out-end">75</span>
+                &nbsp;|&nbsp; Duration: <span class="out-duration">50</span>
+            </div>
+        </div>
+
+        <div>
+            <h3>Timeline (0:00 - 10:00)</h3>
+            <p class="info">時間軸範例，單位為秒</p>
+
+            <div class="range-slider" data-min="0" data-max="600" data-start="120" data-end="360">
+                <div class="track"></div>
+                <div class="track-ticks"></div>
+                <div class="range-fill"></div>
+                <div class="handle handle-start">
+                    <div class="handle-label"></div>
+                </div>
+                <div class="handle handle-end">
+                    <div class="handle-label"></div>
+                </div>
+            </div>
+            <div class="labels">
+                <span>0:00</span>
+                <span>2:30</span>
+                <span>5:00</span>
+                <span>7:30</span>
+                <span>10:00</span>
+            </div>
+
+            <div class="output">
+                Range: <span class="out-start">2:00</span> — <span class="out-end">6:00</span>
+                &nbsp;|&nbsp; Duration: <span class="out-duration">4:00</span>
+            </div>
+        </div>
+
+        <script>
+            class RangeSlider {
+                constructor( el, formatter = ( v ) => v.toFixed( 0 ) ) {
+                    this.el = el;
+                    this.formatter = formatter;
+                    this.min = parseFloat( el.dataset.min ) || 0;
+                    this.max = parseFloat( el.dataset.max ) || 100;
+                    this.start = parseFloat( el.dataset.start ) || this.min;
+                    this.end = parseFloat( el.dataset.end ) || this.max;
+
+                    this.fill = el.querySelector( '.range-fill' );
+                    this.handleStart = el.querySelector( '.handle-start' );
+                    this.handleEnd = el.querySelector( '.handle-end' );
+                    this.labelStart = this.handleStart.querySelector( '.handle-label' );
+                    this.labelEnd = this.handleEnd.querySelector( '.handle-label' );
+
+                    this.output = el.parentElement.querySelector( '.output' );
+
+                    this.renderTicks();
+                    this.bindEvents();
+                    this.update();
+                }
+
+                renderTicks() {
+                    const ticks = this.el.querySelector( '.track-ticks' );
+                    for ( let i = 0; i <= 20; i ++ ) {
+                        const tick = document.createElement( 'div' );
+                        tick.className = 'tick';
+                        ticks.appendChild( tick );
+                    }
+                }
+
+                bindEvents() {
+                    this.handleStart.addEventListener( 'mousedown', ( e ) => this.startDrag( e, 'start' ) );
+                    this.handleEnd.addEventListener( 'mousedown', ( e ) => this.startDrag( e, 'end' ) );
+                    this.fill.addEventListener( 'mousedown', ( e ) => this.startDrag( e, 'range' ) );
+                }
+
+                startDrag( e, type ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const activeEl = type === 'start' ? this.handleStart
+                        : type === 'end' ? this.handleEnd
+                            : this.fill;
+                    activeEl.classList.add( 'dragging' );
+
+                    const startX = e.clientX;
+                    const startStart = this.start;
+                    const startEnd = this.end;
+                    const range = this.end - this.start;
+
+                    const onMove = ( e ) => {
+                        const rect = this.el.getBoundingClientRect();
+                        const dx = e.clientX - startX;
+                        const dValue = ( dx / rect.width ) * ( this.max - this.min );
+
+                        if ( type === 'start' ) {
+                            this.start = Math.max( this.min, Math.min( this.end - 1, startStart + dValue ) );
+                        } else if ( type === 'end' ) {
+                            this.end = Math.max( this.start + 1, Math.min( this.max, startEnd + dValue ) );
+                        } else {
+                            let newStart = startStart + dValue;
+                            let newEnd = startEnd + dValue;
+
+                            if ( newStart < this.min ) {
+                                newStart = this.min;
+                                newEnd = this.min + range;
+                            }
+                            if ( newEnd > this.max ) {
+                                newEnd = this.max;
+                                newStart = this.max - range;
+                            }
+
+                            this.start = newStart;
+                            this.end = newEnd;
+                        }
+
+                        this.update();
+                        this.dispatch();
+                    };
+
+                    const onUp = () => {
+                        activeEl.classList.remove( 'dragging' );
+                        document.removeEventListener( 'mousemove', onMove );
+                        document.removeEventListener( 'mouseup', onUp );
+                    };
+
+                    document.addEventListener( 'mousemove', onMove );
+                    document.addEventListener( 'mouseup', onUp );
+                }
+
+                update() {
+                    const startPct = ( ( this.start - this.min ) / ( this.max - this.min ) ) * 100;
+                    const endPct = ( ( this.end - this.min ) / ( this.max - this.min ) ) * 100;
+
+                    this.handleStart.style.left = `${ startPct }%`;
+                    this.handleEnd.style.left = `${ endPct }%`;
+                    this.fill.style.left = `${ startPct }%`;
+                    this.fill.style.width = `${ endPct - startPct }%`;
+
+                    this.labelStart.textContent = this.formatter( this.start );
+                    this.labelEnd.textContent = this.formatter( this.end );
+
+                    if ( this.output ) {
+                        this.output.querySelector( '.out-start' ).textContent = this.formatter( this.start );
+                        this.output.querySelector( '.out-end' ).textContent = this.formatter( this.end );
+                        this.output.querySelector( '.out-duration' ).textContent = this.formatter( this.end - this.start );
+                    }
+                }
+
+                dispatch() {
+                    this.el.dispatchEvent( new CustomEvent( 'range-change', {
+                        detail: { start: this.start, end: this.end }
+                    } ) );
+                }
+            }
+
+            // Formatters
+            const timeFormatter = ( seconds ) => {
+                const m = Math.floor( seconds / 60 );
+                const s = Math.floor( seconds % 60 );
+                return `${ m }:${ s.toString().padStart( 2, '0' ) }`;
+            };
+
+            // Init
+            const sliders = document.querySelectorAll( '.range-slider' );
+            new RangeSlider( sliders[ 0 ] );
+            new RangeSlider( sliders[ 1 ], timeFormatter );
+        </script>
+    </body>
+</html>
