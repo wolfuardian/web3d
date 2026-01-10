@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Timeline Component</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f0f1a;
+      color: #eee;
+      min-height: 100vh;
+      padding: 24px;
+      touch-action: none;
+    }
+    
+    h3 {
+      color: #6366f1;
+      margin-bottom: 8px;
+    }
+    
+    .info {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    
+    .timeline {
+      position: relative;
+      height: 64px;
+      background: #1a1a2e;
+      border-radius: 8px;
+    }
+    
+    .track {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 50%;
+      height: 8px;
+      background: #2a2a3e;
+      border-radius: 4px;
+      transform: translateY(-50%);
+    }
+    
+    /* Range: 選取範圍 */
+    .range-fill {
+      position: absolute;
+      top: 50%;
+      height: 8px;
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 4px;
+      transform: translateY(-50%);
+      cursor: grab;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+    }
+    
+    .range-fill.dragging {
+      cursor: grabbing;
+      background: rgba(99, 102, 241, 0.4);
+    }
+    
+    .range-handle {
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 28px;
+      background: #6366f1;
+      border-radius: 4px;
+      transform: translate(-50%, -50%);
+      cursor: ew-resize;
+      z-index: 10;
+    }
+    
+    .range-handle:hover,
+    .range-handle.dragging {
+      background: #818cf8;
+    }
+    
+    .range-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 12px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 1px;
+    }
+    
+    /* Playhead: 時間點 */
+    .playhead {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      cursor: grab;
+    }
+    
+    .playhead.dragging {
+      cursor: grabbing;
+    }
+    
+    .playhead-line {
+      position: absolute;
+      left: 50%;
+      top: -20px;
+      bottom: -20px;
+      width: 2px;
+      background: #f43f5e;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    
+    .playhead-head {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      background: #f43f5e;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+    
+    .playhead.dragging .playhead-head {
+      transform: scale(1.2);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+    }
+    
+    /* Labels */
+    .time-labels {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px 0;
+      font-size: 11px;
+      color: #555;
+    }
+    
+    .output {
+      margin-top: 16px;
+      padding: 16px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .output-row {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .output .label {
+      color: #666;
+      min-width: 80px;
+    }
+    
+    .output .value {
+      color: #6366f1;
+    }
+    
+    .output .playhead-value {
+      color: #f43f5e;
+    }
+    
+    .demo {
+      margin-bottom: 48px;
+    }
+    
+    /* 限制提示 */
+    .constraint-hint {
+      font-size: 12px;
+      color: #f43f5e;
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+    
+    .constraint-hint.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo">
+  <h3>Timeline Component</h3>
+  <p class="info">藍色區塊 = 選取範圍（可整體拖曳或調整頭尾）｜紅色 = 播放頭（限制在範圍內）</p>
+  
+  <div class="timeline" id="timeline1" data-min="0" data-max="100">
+    <div class="track"></div>
+    <div class="range-fill"></div>
+    <div class="range-handle range-start"></div>
+    <div class="range-handle range-end"></div>
+    <div class="playhead">
+      <div class="playhead-line"></div>
+      <div class="playhead-head"></div>
+    </div>
+  </div>
+  <div class="time-labels">
+    <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+  </div>
+  <div class="constraint-hint" id="hint1">⚠ 播放頭被限制在選取範圍內</div>
+  
+  <div class="output">
+    <div class="output-row">
+      <span class="label">Range:</span>
+      <span class="value"><span id="out1-start">20</span> — <span id="out1-end">80</span></span>
+    </div>
+    <div class="output-row">
+      <span class="label">Playhead:</span>
+      <span class="playhead-value" id="out1-playhead">50</span>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h3>Timeline (Time Format 0:00 - 5:00)</h3>
+  <p class="info">時間軸格式範例，單位為秒</p>
+  
+  <div class="timeline" id="timeline2" data-min="0" data-max="300">
+    <div class="track"></div>
+    <div class="range-fill"></div>
+    <div class="range-handle range-start"></div>
+    <div class="range-handle range-end"></div>
+    <div class="playhead">
+      <div class="playhead-line"></div>
+      <div class="playhead-head"></div>
+    </div>
+  </div>
+  <div class="time-labels">
+    <span>0:00</span><span>1:15</span><span>2:30</span><span>3:45</span><span>5:00</span>
+  </div>
+  <div class="constraint-hint" id="hint2">⚠ 播放頭被限制在選取範圍內</div>
+  
+  <div class="output">
+    <div class="output-row">
+      <span class="label">Range:</span>
+      <span class="value"><span id="out2-start">0:30</span> — <span id="out2-end">4:00</span></span>
+    </div>
+    <div class="output-row">
+      <span class="label">Playhead:</span>
+      <span class="playhead-value" id="out2-playhead">2:00</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Pointer Events 拖曳工具
+function makeDraggable(el, callbacks) {
+  const start = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+    callbacks.onStart?.(e);
+  };
+  
+  const move = (e) => {
+    if (!el.classList.contains('dragging')) return;
+    callbacks.onMove?.(e);
+  };
+  
+  const end = (e) => {
+    el.classList.remove('dragging');
+    el.releasePointerCapture(e.pointerId);
+    callbacks.onEnd?.(e);
+  };
+  
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+
+// Timeline 類別
+class Timeline {
+  constructor(el, options = {}) {
+    this.el = el;
+    this.min = parseFloat(el.dataset.min) || 0;
+    this.max = parseFloat(el.dataset.max) || 100;
+    this.formatter = options.formatter || (v => v.toFixed(0));
+    this.outputs = options.outputs || {};
+    this.hintEl = options.hintEl;
+    
+    // 狀態
+    this.rangeStart = options.rangeStart ?? this.min + (this.max - this.min) * 0.2;
+    this.rangeEnd = options.rangeEnd ?? this.min + (this.max - this.min) * 0.8;
+    this.playhead = options.playhead ?? (this.rangeStart + this.rangeEnd) / 2;
+    
+    // 元素
+    this.fill = el.querySelector('.range-fill');
+    this.handleStart = el.querySelector('.range-start');
+    this.handleEnd = el.querySelector('.range-end');
+    this.playheadEl = el.querySelector('.playhead');
+    
+    this.padding = 12;
+    
+    this.bindEvents();
+    this.update();
+    
+    window.addEventListener('resize', () => this.update());
+  }
+  
+  getWidth() {
+    return this.el.getBoundingClientRect().width - this.padding * 2;
+  }
+  
+  valueToPx(value) {
+    const ratio = (value - this.min) / (this.max - this.min);
+    return this.padding + ratio * this.getWidth();
+  }
+  
+  pxToValue(clientX) {
+    const rect = this.el.getBoundingClientRect();
+    const x = clientX - rect.left - this.padding;
+    const ratio = x / this.getWidth();
+    return this.min + Math.max(0, Math.min(1, ratio)) * (this.max - this.min);
+  }
+  
+  clampPlayhead() {
+    const before = this.playhead;
+    this.playhead = Math.max(this.rangeStart, Math.min(this.rangeEnd, this.playhead));
+    return before !== this.playhead;
+  }
+  
+  showHint() {
+    if (this.hintEl) {
+      this.hintEl.classList.add('show');
+      clearTimeout(this.hintTimeout);
+      this.hintTimeout = setTimeout(() => {
+        this.hintEl.classList.remove('show');
+      }, 1500);
+    }
+  }
+  
+  update() {
+    const startPx = this.valueToPx(this.rangeStart);
+    const endPx = this.valueToPx(this.rangeEnd);
+    const playheadPx = this.valueToPx(this.playhead);
+    
+    this.handleStart.style.left = `${startPx}px`;
+    this.handleEnd.style.left = `${endPx}px`;
+    this.fill.style.left = `${startPx}px`;
+    this.fill.style.width = `${endPx - startPx}px`;
+    this.playheadEl.style.left = `${playheadPx}px`;
+    
+    // 更新輸出
+    if (this.outputs.start) this.outputs.start.textContent = this.formatter(this.rangeStart);
+    if (this.outputs.end) this.outputs.end.textContent = this.formatter(this.rangeEnd);
+    if (this.outputs.playhead) this.outputs.playhead.textContent = this.formatter(this.playhead);
+  }
+  
+  bindEvents() {
+    // Range Start Handle
+    makeDraggable(this.handleStart, {
+      onMove: (e) => {
+        this.rangeStart = Math.max(this.min, Math.min(this.rangeEnd - 1, this.pxToValue(e.clientX)));
+        if (this.clampPlayhead()) this.showHint();
+        this.update();
+      }
+    });
+    
+    // Range End Handle
+    makeDraggable(this.handleEnd, {
+      onMove: (e) => {
+        this.rangeEnd = Math.max(this.rangeStart + 1, Math.min(this.max, this.pxToValue(e.clientX)));
+        if (this.clampPlayhead()) this.showHint();
+        this.update();
+      }
+    });
+    
+    // Range Fill (整體移動)
+    let dragOffset = 0;
+    makeDraggable(this.fill, {
+      onStart: (e) => {
+        dragOffset = this.pxToValue(e.clientX) - this.rangeStart;
+      },
+      onMove: (e) => {
+        const range = this.rangeEnd - this.rangeStart;
+        let newStart = this.pxToValue(e.clientX) - dragOffset;
+        
+        if (newStart < this.min) newStart = this.min;
+        if (newStart + range > this.max) newStart = this.max - range;
+        
+        // 計算 playhead 相對位置並保持
+        const playheadRatio = (this.playhead - this.rangeStart) / range;
+        
+        this.rangeStart = newStart;
+        this.rangeEnd = newStart + range;
+        this.playhead = this.rangeStart + playheadRatio * range;
+        
+        this.update();
+      }
+    });
+    
+    // Playhead
+    makeDraggable(this.playheadEl, {
+      onMove: (e) => {
+        const value = this.pxToValue(e.clientX);
+        this.playhead = Math.max(this.rangeStart, Math.min(this.rangeEnd, value));
+        this.update();
+      }
+    });
+  }
+}
+
+// 時間格式化
+const timeFormatter = (seconds) => {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+// 初始化
+new Timeline(document.getElementById('timeline1'), {
+  outputs: {
+    start: document.getElementById('out1-start'),
+    end: document.getElementById('out1-end'),
+    playhead: document.getElementById('out1-playhead')
+  },
+  hintEl: document.getElementById('hint1')
+});
+
+new Timeline(document.getElementById('timeline2'), {
+  formatter: timeFormatter,
+  rangeStart: 30,
+  rangeEnd: 240,
+  playhead: 120,
+  outputs: {
+    start: document.getElementById('out2-start'),
+    end: document.getElementById('out2-end'),
+    playhead: document.getElementById('out2-playhead')
+  },
+  hintEl: document.getElementById('hint2')
+});
+</script>
+</body>
+</html>
