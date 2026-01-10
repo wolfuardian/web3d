@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Touch Drag Utility</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f0f1a;
+      color: #eee;
+      min-height: 100vh;
+      padding: 24px;
+      touch-action: none;
+    }
+    
+    h3 {
+      color: #6366f1;
+      margin-bottom: 16px;
+    }
+    
+    .demo {
+      margin-bottom: 48px;
+    }
+    
+    /* Simple Slider Demo */
+    .slider {
+      position: relative;
+      height: 48px;
+      background: #1a1a2e;
+      border-radius: 8px;
+    }
+    
+    .slider .track {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 50%;
+      height: 4px;
+      background: #2a2a3e;
+      border-radius: 2px;
+      transform: translateY(-50%);
+    }
+    
+    .slider .thumb {
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      background: #6366f1;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+    }
+    
+    .slider .thumb.dragging {
+      cursor: grabbing;
+      background: #818cf8;
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+    
+    /* Range Slider Demo */
+    .range-slider {
+      position: relative;
+      height: 48px;
+      background: #1a1a2e;
+      border-radius: 8px;
+    }
+    
+    .range-slider .track {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 50%;
+      height: 4px;
+      background: #2a2a3e;
+      border-radius: 2px;
+      transform: translateY(-50%);
+    }
+    
+    .range-slider .fill {
+      position: absolute;
+      top: 50%;
+      height: 4px;
+      background: #6366f1;
+      border-radius: 2px;
+      transform: translateY(-50%);
+      cursor: grab;
+    }
+    
+    .range-slider .fill.dragging {
+      cursor: grabbing;
+      background: #818cf8;
+    }
+    
+    .range-slider .handle {
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border: 3px solid #6366f1;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+    }
+    
+    .range-slider .handle.dragging {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.15);
+      border-color: #818cf8;
+    }
+    
+    .output {
+      margin-top: 12px;
+      padding: 12px;
+      background: #1a1a2e;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .output span { color: #6366f1; }
+    
+    code {
+      display: block;
+      margin-top: 24px;
+      padding: 16px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo">
+  <h3>Simple Slider (Touch + Mouse)</h3>
+  <div class="slider" id="slider1">
+    <div class="track"></div>
+    <div class="thumb"></div>
+  </div>
+  <div class="output">Value: <span id="out1">50</span></div>
+</div>
+
+<div class="demo">
+  <h3>Range Slider (Touch + Mouse)</h3>
+  <div class="range-slider" id="slider2">
+    <div class="track"></div>
+    <div class="fill"></div>
+    <div class="handle handle-start"></div>
+    <div class="handle handle-end"></div>
+  </div>
+  <div class="output">Range: <span id="out2-start">25</span> — <span id="out2-end">75</span></div>
+</div>
+
+<h3>Pointer Events Utility</h3>
+<code>
+// 統一處理 mouse + touch 的拖曳工具
+function makeDraggable(el, callbacks) {
+  const start = (e) => {
+    e.preventDefault();
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+    callbacks.onStart?.(e);
+  };
+  
+  const move = (e) => {
+    if (!el.classList.contains('dragging')) return;
+    callbacks.onMove?.(e);
+  };
+  
+  const end = (e) => {
+    el.classList.remove('dragging');
+    el.releasePointerCapture(e.pointerId);
+    callbacks.onEnd?.(e);
+  };
+  
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+</code>
+
+<script>
+// 統一處理 mouse + touch 的拖曳工具
+function makeDraggable(el, callbacks) {
+  const start = (e) => {
+    e.preventDefault();
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+    callbacks.onStart?.(e);
+  };
+  
+  const move = (e) => {
+    if (!el.classList.contains('dragging')) return;
+    callbacks.onMove?.(e);
+  };
+  
+  const end = (e) => {
+    el.classList.remove('dragging');
+    el.releasePointerCapture(e.pointerId);
+    callbacks.onEnd?.(e);
+  };
+  
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+
+// Demo 1: Simple Slider
+{
+  const slider = document.getElementById('slider1');
+  const thumb = slider.querySelector('.thumb');
+  const out = document.getElementById('out1');
+  let value = 50;
+  
+  const update = () => {
+    const pct = value;
+    thumb.style.left = `calc(12px + ${pct}% * (100% - 24px) / 100)`;
+    out.textContent = value.toFixed(0);
+  };
+  update();
+  
+  makeDraggable(thumb, {
+    onMove(e) {
+      const rect = slider.getBoundingClientRect();
+      const x = e.clientX - rect.left - 12;
+      const width = rect.width - 24;
+      value = Math.max(0, Math.min(100, (x / width) * 100));
+      update();
+    }
+  });
+}
+
+// Demo 2: Range Slider
+{
+  const slider = document.getElementById('slider2');
+  const fill = slider.querySelector('.fill');
+  const handleStart = slider.querySelector('.handle-start');
+  const handleEnd = slider.querySelector('.handle-end');
+  const outStart = document.getElementById('out2-start');
+  const outEnd = document.getElementById('out2-end');
+  
+  let start = 25, end = 75;
+  
+  const update = () => {
+    const left = `calc(12px + ${start}% * (100% - 24px) / 100)`;
+    const right = `calc(12px + ${end}% * (100% - 24px) / 100)`;
+    handleStart.style.left = left;
+    handleEnd.style.left = right;
+    fill.style.left = left;
+    fill.style.width = `calc((${end - start}%) * (100% - 24px) / 100)`;
+    outStart.textContent = start.toFixed(0);
+    outEnd.textContent = end.toFixed(0);
+  };
+  update();
+  
+  const getValueFromX = (clientX) => {
+    const rect = slider.getBoundingClientRect();
+    const x = clientX - rect.left - 12;
+    const width = rect.width - 24;
+    return Math.max(0, Math.min(100, (x / width) * 100));
+  };
+  
+  makeDraggable(handleStart, {
+    onMove(e) {
+      start = Math.min(end - 1, getValueFromX(e.clientX));
+      update();
+    }
+  });
+  
+  makeDraggable(handleEnd, {
+    onMove(e) {
+      end = Math.max(start + 1, getValueFromX(e.clientX));
+      update();
+    }
+  });
+  
+  // Range drag
+  let dragOffset = 0;
+  makeDraggable(fill, {
+    onStart(e) {
+      dragOffset = getValueFromX(e.clientX) - start;
+    },
+    onMove(e) {
+      const range = end - start;
+      let newStart = getValueFromX(e.clientX) - dragOffset;
+      
+      if (newStart < 0) newStart = 0;
+      if (newStart + range > 100) newStart = 100 - range;
+      
+      start = newStart;
+      end = newStart + range;
+      update();
+    }
+  });
+}
+</script>
+</body>
+</html>
