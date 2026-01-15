@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-family: monospace;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div>金幣: <span id="coins">0</span></div>
+    <div>每秒: <span id="cps">0</span></div>
+    <div>點擊力: <span id="clickPower">1</span></div>
+    <div style="margin-top:10px;">
+      <button id="saveBtn">儲存</button>
+      <button id="loadBtn">讀取</button>
+      <span id="status"></span>
+    </div>
+    <div style="margin-top:5px; font-size:12px;">
+      玩家ID: <input id="playerId" value="player1" style="width:80px;">
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // 遊戲狀態
+    const state = {
+      coins: 0,
+      clickPower: 1,
+      cps: 0, // coins per second
+      upgrades: [
+        { name: '自動礦工', cost: 10, cpsBonus: 1, owned: 0 },
+        { name: '強化點擊', cost: 50, clickBonus: 1, owned: 0 },
+        { name: '礦場', cost: 200, cpsBonus: 5, owned: 0 },
+      ]
+    };
+
+    // Three.js 設置
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+    
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 主要點擊目標
+    const mainGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+    const mainMat = new THREE.MeshBasicMaterial({ color: 0xffd700, wireframe: true });
+    const mainCube = new THREE.Mesh(mainGeo, mainMat);
+    scene.add(mainCube);
+
+    // 升級按鈕 (用 3D 物件表示)
+    const upgradeButtons = [];
+    state.upgrades.forEach((upgrade, i) => {
+      const geo = new THREE.BoxGeometry(0.8, 0.4, 0.1);
+      const mat = new THREE.MeshBasicMaterial({ color: 0x4a4a6a });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(3, 1.5 - i * 0.8, 0);
+      mesh.userData = { type: 'upgrade', index: i };
+      scene.add(mesh);
+      upgradeButtons.push(mesh);
+    });
+
+    // Raycaster
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // 點擊處理
+    function onClick(event) {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(scene.children);
+
+      if (intersects.length > 0) {
+        const obj = intersects[0].object;
+        
+        if (obj === mainCube) {
+          // 點擊主方塊獲得金幣
+          state.coins += state.clickPower;
+        } else if (obj.userData.type === 'upgrade') {
+          // 購買升級
+          const upgrade = state.upgrades[obj.userData.index];
+          if (state.coins >= upgrade.cost) {
+            state.coins -= upgrade.cost;
+            upgrade.owned++;
+            upgrade.cost = Math.floor(upgrade.cost * 1.5);
+            
+            if (upgrade.cpsBonus) state.cps += upgrade.cpsBonus;
+            if (upgrade.clickBonus) state.clickPower += upgrade.clickBonus;
+          }
+        }
+        updateUI();
+      }
+    }
+
+    window.addEventListener('click', onClick);
+
+    // 自動收益
+    let lastTime = performance.now();
+    function autoEarn(currentTime) {
+      const delta = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+      
+      if (state.cps > 0) {
+        state.coins += state.cps * delta;
+        updateUI();
+      }
+    }
+
+    // UI 更新
+    function updateUI() {
+      document.getElementById('coins').textContent = Math.floor(state.coins);
+      document.getElementById('cps').textContent = state.cps;
+      document.getElementById('clickPower').textContent = state.clickPower;
+
+      // 更新升級按鈕顏色
+      upgradeButtons.forEach((btn, i) => {
+        const canAfford = state.coins >= state.upgrades[i].cost;
+        btn.material.color.setHex(canAfford ? 0x00aa00 : 0x4a4a6a);
+      });
+    }
+
+    // 主迴圈
+    function animate(time) {
+      requestAnimationFrame(animate);
+      autoEarn(time);
+      mainCube.rotation.x += 0.005;
+      mainCube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+
+    // 視窗縮放
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Google Sheets 存檔系統
+    const SHEET_ID = '1EXxGDEMmEb8FQPfhXbP06YpVl2fxRiRDlCYKupyGkHY';
+    const API_KEY = 'AIzaSyAva07lQWnOmxG6-fTxS-67eCjlwHVlQfo';
+    const SHEET_NAME = '表單回應 1'; // Forms 連結後的工作表名稱
+
+    // Google Forms 寫入設定
+    const FORM_ID = '1w2bZG4Cgkaw5vhBzb_bS6M8VFDT8bM6mqD8x8GIqoHM';
+    const ENTRY_PLAYER_ID = 'entry.185562167';
+    const ENTRY_DATA = 'entry.1739801308';
+    const ENTRY_TIMESTAMP = 'entry.1891087582';
+
+    async function saveToSheet() {
+      const playerId = document.getElementById('playerId').value;
+      const status = document.getElementById('status');
+      status.textContent = '儲存中...';
+
+      const saveData = {
+        coins: state.coins,
+        clickPower: state.clickPower,
+        cps: state.cps,
+        upgrades: state.upgrades
+      };
+
+      try {
+        const formUrl = `https://docs.google.com/forms/d/${FORM_ID}/formResponse`;
+        const formData = new URLSearchParams();
+        formData.append(ENTRY_PLAYER_ID, playerId);
+        formData.append(ENTRY_DATA, JSON.stringify(saveData));
+        formData.append(ENTRY_TIMESTAMP, new Date().toISOString());
+
+        await fetch(formUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString()
+        });
+
+        status.textContent = '✓ 已儲存';
+      } catch (e) {
+        console.error(e);
+        status.textContent = '✗ 儲存失敗';
+      }
+    }
+
+    async function loadFromSheet() {
+      const playerId = document.getElementById('playerId').value;
+      const status = document.getElementById('status');
+      status.textContent = '讀取中...';
+
+      try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.values) {
+          // 找該 playerId 的最後一筆（最新存檔）
+          const rows = data.values.filter(r => r[1] === playerId);
+          if (rows.length > 0) {
+            const lastRow = rows[rows.length - 1];
+            const saveData = JSON.parse(lastRow[2]); // Forms 回應欄位順序：時間戳、playerId、data、timestamp
+            state.coins = saveData.coins || 0;
+            state.clickPower = saveData.clickPower || 1;
+            state.cps = saveData.cps || 0;
+            state.upgrades = saveData.upgrades || state.upgrades;
+            updateUI();
+            status.textContent = '✓ 已讀取';
+            return;
+          }
+        }
+        status.textContent = '找不到存檔';
+      } catch (e) {
+        console.error(e);
+        status.textContent = '✗ 讀取失敗';
+      }
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', saveToSheet);
+    document.getElementById('loadBtn').addEventListener('click', loadFromSheet);
+
+    animate(performance.now());
+  </script>
+</body>
+</html>
