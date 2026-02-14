@@ -1,35 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>點擊遊戲 — Web3D Lab</title>
     <style>
-      body { margin: 0; overflow: hidden; touch-action: manipulation; }
-      canvas { display: block; }
-      #ui {
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { overflow: hidden; touch-action: none; background: #1a1a2e; }
+      canvas { display: block; touch-action: none; }
+
+      /* ── Top HUD ── */
+      #hud {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        color: white;
+        top: 0; left: 0; right: 0;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 14px 20px;
+        background: linear-gradient(rgba(15,15,26,0.95), transparent);
         font-family: monospace;
-        font-size: 16px;
+        font-size: 15px;
+        color: #eee;
+        z-index: 10;
+      }
+      .hud-stat { display: flex; align-items: center; gap: 6px; }
+      .hud-label { color: #888; font-size: 12px; }
+      .hud-val { color: #ffd700; font-weight: 700; }
+      .hud-val.cps { color: #4ade80; }
+      .hud-val.power { color: #818cf8; }
+
+      /* ── Save/Load ── */
+      #save-panel {
+        position: absolute;
+        top: 52px; left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        color: #888;
+        z-index: 10;
+      }
+      #save-panel button {
+        padding: 4px 12px;
+        background: #2a2a3e;
+        border: 1px solid #3a3a4e;
+        border-radius: 6px;
+        color: #aaa;
+        font-family: monospace;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+      }
+      #save-panel button:hover {
+        background: #3a3a4e;
+        border-color: #6366f1;
+        color: #eee;
+      }
+      #save-panel input {
+        width: 80px;
+        padding: 4px 8px;
+        background: #1a1a2e;
+        border: 1px solid #3a3a4e;
+        border-radius: 6px;
+        color: #eee;
+        font-family: monospace;
+        font-size: 12px;
+        outline: none;
+      }
+      #save-panel input:focus { border-color: #6366f1; }
+
+      /* ── Home Link ── */
+      #home-link {
+        position: absolute;
+        top: 16px; right: 20px;
+        color: #6366f1;
+        text-decoration: none;
+        font-family: monospace;
+        font-size: 14px;
+        z-index: 10;
+      }
+      #home-link:hover { text-decoration: underline; }
+
+      /* ── Upgrade Panel ── */
+      #upgrades {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        display: flex;
+        gap: 8px;
+        padding: 16px 12px;
+        padding-top: 40px;
+        background: linear-gradient(transparent, rgba(15,15,26,0.9) 30%);
+        justify-content: center;
+        flex-wrap: wrap;
+        z-index: 10;
+      }
+
+      .upgrade-btn {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 16px;
+        background: #1a1a2e;
+        border: 2px solid #2a2a3e;
+        border-radius: 12px;
+        color: #eee;
+        cursor: pointer;
+        min-width: 140px;
+        max-width: 200px;
+        flex: 1;
+        text-align: left;
+        font-family: monospace;
+        transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      .upgrade-btn:active { transform: scale(0.96); }
+      .upgrade-btn.affordable {
+        border-color: #6366f1;
+        box-shadow: 0 0 12px rgba(99,102,241,0.2);
+      }
+      .upgrade-btn.affordable:hover {
+        border-color: #818cf8;
+        box-shadow: 0 0 20px rgba(99,102,241,0.3);
+      }
+      .upgrade-btn.too-expensive { opacity: 0.45; cursor: default; }
+
+      .upgrade-name { font-size: 14px; font-weight: 700; }
+      .upgrade-cost { font-size: 12px; color: #ffd700; }
+      .upgrade-info { font-size: 11px; color: #888; }
+      .upgrade-owned { font-size: 11px; color: #4ade80; }
+
+      /* ── Click Feedback ── */
+      .click-feedback {
+        position: absolute;
+        color: #ffd700;
+        font-family: monospace;
+        font-weight: 700;
+        font-size: 22px;
+        pointer-events: none;
+        z-index: 20;
+        animation: floatUp 0.8s ease-out forwards;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      }
+      @keyframes floatUp {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-50px) scale(0.7); }
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 600px) {
+        #hud { gap: 12px; padding: 10px 14px; font-size: 13px; }
+        #upgrades {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 8px;
+          padding-top: 32px;
+          gap: 6px;
+        }
+        .upgrade-btn {
+          flex-direction: row;
+          align-items: center;
+          gap: 12px;
+          max-width: 100%;
+          min-width: unset;
+          padding: 10px 14px;
+        }
+        .upgrade-btn .upgrade-info { display: none; }
       }
     </style>
   </head>
   <body>
-    <div id="ui">
-      <div>金幣: <span id="coins">0</span></div>
-      <div>每秒: <span id="cps">0</span></div>
-      <div>點擊力: <span id="clickPower">1</span></div>
-      <div style="margin-top:10px;">
-        <button id="saveBtn">儲存</button>
-        <button id="loadBtn">讀取</button>
-        <span id="status"></span>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-stat">
+        <span class="hud-label">金幣</span>
+        <span class="hud-val" id="coins">0</span>
       </div>
-      <div style="margin-top:5px; font-size:12px;">
-        玩家ID: <input id="playerId" value="player1" style="width:80px;">
+      <div class="hud-stat">
+        <span class="hud-label">每秒</span>
+        <span class="hud-val cps" id="cps">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">點擊力</span>
+        <span class="hud-val power" id="clickPower">1</span>
       </div>
     </div>
+
+    <!-- Save/Load -->
+    <div id="save-panel">
+      <span>ID:</span>
+      <input id="playerId" value="player1">
+      <button id="saveBtn">儲存</button>
+      <button id="loadBtn">讀取</button>
+      <span id="status"></span>
+    </div>
+
+    <!-- Home -->
+    <a href="index.html" id="home-link">← 首頁</a>
+
+    <!-- Upgrades (generated by JS) -->
+    <div id="upgrades"></div>
 
     <script type="importmap">
       {
@@ -42,11 +214,11 @@
     <script type="module">
       import * as THREE from 'three';
 
-      // 遊戲狀態
+      // ═══ Game State ═══
       const state = {
         coins: 0,
         clickPower: 1,
-        cps: 0, // coins per second
+        cps: 0,
         upgrades: [
           { name: '自動礦工', cost: 10, cpsBonus: 1, owned: 0 },
           { name: '強化點擊', cost: 50, clickBonus: 1, owned: 0 },
@@ -54,97 +226,161 @@
         ]
       };
 
-      // Three.js 設置
+      // ═══ Three.js Setup ═══
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x1a1a2e);
 
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
+      camera.position.z = 4;
 
-      const renderer = new THREE.WebGLRenderer();
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       document.body.appendChild(renderer.domElement);
 
-      // 主要點擊目標
+      // Main clickable cube
       const mainGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
       const mainMat = new THREE.MeshBasicMaterial({ color: 0xffd700, wireframe: true });
       const mainCube = new THREE.Mesh(mainGeo, mainMat);
       scene.add(mainCube);
 
-      // 升級按鈕 (用 3D 物件表示)
-      const upgradeButtons = [];
-      state.upgrades.forEach((upgrade, i) => {
-        const geo = new THREE.BoxGeometry(0.8, 0.4, 0.1);
-        const mat = new THREE.MeshBasicMaterial({ color: 0x4a4a6a });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(-1.5 + i * 1.5, -2, 0); // 水平排列在下方
-        mesh.userData = { type: 'upgrade', index: i };
-        scene.add(mesh);
-        upgradeButtons.push(mesh);
-      });
-
       // Raycaster
       const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
+      const pointer = new THREE.Vector2();
 
-      // 點擊處理
-      function onClick(event) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      // ═══ Click Handler (Pointer Events) ═══
+      renderer.domElement.addEventListener('pointerdown', onPointerDown);
 
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(scene.children);
+      function onPointerDown(event) {
+        event.preventDefault();
+
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(pointer, camera);
+        const intersects = raycaster.intersectObject(mainCube);
 
         if (intersects.length > 0) {
-          const obj = intersects[0].object;
+          state.coins += state.clickPower;
+          updateUI();
+          animateCubeClick();
+          showClickFeedback(event.clientX, event.clientY);
+        }
+      }
 
-          if (obj === mainCube) {
-            // 點擊主方塊獲得金幣
-            state.coins += state.clickPower;
-          } else if (obj.userData.type === 'upgrade') {
-            // 購買升級
-            const upgrade = state.upgrades[obj.userData.index];
-            if (state.coins >= upgrade.cost) {
-              state.coins -= upgrade.cost;
-              upgrade.owned++;
-              upgrade.cost = Math.floor(upgrade.cost * 1.5);
+      // ═══ Cube Click Animation ═══
+      function animateCubeClick() {
+        const targetScale = 1.25;
+        const duration = 150;
+        const startTime = performance.now();
 
-              if (upgrade.cpsBonus) state.cps += upgrade.cpsBonus;
-              if (upgrade.clickBonus) state.clickPower += upgrade.clickBonus;
-            }
+        function tick(now) {
+          const elapsed = now - startTime;
+          const t = Math.min(elapsed / duration, 1);
+          // ease-out-back
+          let scale;
+          if (t < 0.5) {
+            scale = 1 + (targetScale - 1) * (t * 2);
+          } else {
+            scale = targetScale + (1 - targetScale) * ((t - 0.5) * 2);
           }
+          mainCube.scale.setScalar(scale);
+          if (t < 1) requestAnimationFrame(tick);
+          else mainCube.scale.setScalar(1);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      // ═══ Floating "+N" Feedback ═══
+      function showClickFeedback(x, y) {
+        const el = document.createElement('div');
+        el.className = 'click-feedback';
+        el.textContent = `+${state.clickPower}`;
+        el.style.left = `${x - 15}px`;
+        el.style.top = `${y - 30}px`;
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }
+
+      // ═══ Upgrade System (HTML Buttons) ═══
+      function renderUpgradeButtons() {
+        const container = document.getElementById('upgrades');
+        container.innerHTML = '';
+
+        state.upgrades.forEach((upgrade, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'upgrade-btn';
+          btn.dataset.index = i;
+
+          const effectText = upgrade.cpsBonus
+            ? `每秒 +${upgrade.cpsBonus} 金幣`
+            : `點擊力 +${upgrade.clickBonus}`;
+
+          btn.innerHTML = `
+            <div class="upgrade-name">${upgrade.name}</div>
+            <div class="upgrade-cost">費用: ${upgrade.cost}</div>
+            <div class="upgrade-info">${effectText}</div>
+            <div class="upgrade-owned">已擁有: ${upgrade.owned}</div>
+          `;
+
+          btn.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            buyUpgrade(i);
+          });
+
+          container.appendChild(btn);
+        });
+      }
+
+      function buyUpgrade(index) {
+        const upgrade = state.upgrades[index];
+        if (state.coins >= upgrade.cost) {
+          state.coins -= upgrade.cost;
+          upgrade.owned++;
+          upgrade.cost = Math.floor(upgrade.cost * 1.5);
+          if (upgrade.cpsBonus) state.cps += upgrade.cpsBonus;
+          if (upgrade.clickBonus) state.clickPower += upgrade.clickBonus;
           updateUI();
         }
       }
 
-      window.addEventListener('click', onClick);
-
-      // 自動收益
+      // ═══ Auto Earn ═══
       let lastTime = performance.now();
       function autoEarn(currentTime) {
         const delta = (currentTime - lastTime) / 1000;
         lastTime = currentTime;
-
         if (state.cps > 0) {
           state.coins += state.cps * delta;
           updateUI();
         }
       }
 
-      // UI 更新
+      // ═══ UI Update ═══
       function updateUI() {
         document.getElementById('coins').textContent = Math.floor(state.coins);
         document.getElementById('cps').textContent = state.cps;
         document.getElementById('clickPower').textContent = state.clickPower;
 
-        // 更新升級按鈕顏色
-        upgradeButtons.forEach((btn, i) => {
-          const canAfford = state.coins >= state.upgrades[i].cost;
-          btn.material.color.setHex(canAfford ? 0x00aa00 : 0x4a4a6a);
+        // Update upgrade buttons
+        const buttons = document.querySelectorAll('.upgrade-btn');
+        buttons.forEach((btn, i) => {
+          const upgrade = state.upgrades[i];
+          const canAfford = state.coins >= upgrade.cost;
+          btn.classList.toggle('affordable', canAfford);
+          btn.classList.toggle('too-expensive', !canAfford);
+
+          btn.querySelector('.upgrade-cost').textContent = `費用: ${upgrade.cost}`;
+          btn.querySelector('.upgrade-owned').textContent = `已擁有: ${upgrade.owned}`;
+
+          const effectText = upgrade.cpsBonus
+            ? `每秒 +${upgrade.cpsBonus} 金幣`
+            : `點擊力 +${upgrade.clickBonus}`;
+          btn.querySelector('.upgrade-info').textContent = effectText;
         });
       }
 
-      // 主迴圈
+      // ═══ Animation Loop ═══
       function animate(time) {
         requestAnimationFrame(animate);
         autoEarn(time);
@@ -153,19 +389,18 @@
         renderer.render(scene, camera);
       }
 
-      // 視窗縮放
+      // ═══ Resize ═══
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
-      // Google Sheets 存檔系統
+      // ═══ Google Sheets Save/Load ═══
       const SHEET_ID = '1EXxGDEMmEb8FQPfhXbP06YpVl2fxRiRDlCYKupyGkHY';
       const API_KEY = 'AIzaSyAva07lQWnOmxG6-fTxS-67eCjlwHVlQfo';
-      const SHEET_NAME = '表單回應 1'; // Forms 連結後的工作表名稱
+      const SHEET_NAME = '表單回應 1';
 
-      // Google Forms 寫入設定
       const FORM_ID = '1w2bZG4Cgkaw5vhBzb_bS6M8VFDT8bM6mqD8x8GIqoHM';
       const ENTRY_PLAYER_ID = 'entry.185562167';
       const ENTRY_DATA = 'entry.1739801308';
@@ -175,6 +410,7 @@
         const playerId = document.getElementById('playerId').value;
         const status = document.getElementById('status');
         status.textContent = '儲存中...';
+        status.style.color = '#888';
 
         const saveData = {
           coins: state.coins,
@@ -198,9 +434,11 @@
           });
 
           status.textContent = '✓ 已儲存';
+          status.style.color = '#4ade80';
         } catch (e) {
           console.error(e);
           status.textContent = '✗ 儲存失敗';
+          status.style.color = '#f43f5e';
         }
       }
 
@@ -208,6 +446,7 @@
         const playerId = document.getElementById('playerId').value;
         const status = document.getElementById('status');
         status.textContent = '讀取中...';
+        status.style.color = '#888';
 
         try {
           const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
@@ -215,30 +454,36 @@
           const data = await res.json();
 
           if (data.values) {
-            // 找該 playerId 的最後一筆（最新存檔）
             const rows = data.values.filter(r => r[1] === playerId);
             if (rows.length > 0) {
               const lastRow = rows[rows.length - 1];
-              const saveData = JSON.parse(lastRow[2]); // Forms 回應欄位順序：時間戳、playerId、data、timestamp
+              const saveData = JSON.parse(lastRow[2]);
               state.coins = saveData.coins || 0;
               state.clickPower = saveData.clickPower || 1;
               state.cps = saveData.cps || 0;
               state.upgrades = saveData.upgrades || state.upgrades;
+              renderUpgradeButtons();
               updateUI();
               status.textContent = '✓ 已讀取';
+              status.style.color = '#4ade80';
               return;
             }
           }
           status.textContent = '找不到存檔';
+          status.style.color = '#fbbf24';
         } catch (e) {
           console.error(e);
           status.textContent = '✗ 讀取失敗';
+          status.style.color = '#f43f5e';
         }
       }
 
-      document.getElementById('saveBtn').addEventListener('click', saveToSheet);
-      document.getElementById('loadBtn').addEventListener('click', loadFromSheet);
+      document.getElementById('saveBtn').addEventListener('click', (e) => { e.stopPropagation(); saveToSheet(); });
+      document.getElementById('loadBtn').addEventListener('click', (e) => { e.stopPropagation(); loadFromSheet(); });
 
+      // ═══ Init ═══
+      renderUpgradeButtons();
+      updateUI();
       animate(performance.now());
     </script>
   </body>

@@ -1,82 +1,210 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Slider Components</title>
-        <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3D Lab</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-            body {
-                font-family: system-ui, sans-serif;
-                background: #0f0f1a;
-                color: #eee;
-                min-height: 100vh;
-                padding: 48px;
-            }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f0f1a;
+            color: #eee;
+            min-height: 100vh;
+        }
 
-            h1 {
-                color: #6366f1;
-                margin-bottom: 32px;
-            }
+        /* ── Hero ── */
+        .hero {
+            padding: 64px 48px 48px;
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        .hero-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 24px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+        .hero-title {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+        .hero-title .accent { color: #6366f1; }
+        .hero-subtitle {
+            font-size: 16px;
+            color: #888;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
 
-            .links {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }
+        /* ── Projects Grid ── */
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 48px 64px;
+        }
 
-            a {
-                display: block;
-                padding: 20px 24px;
-                background: #1a1a2e;
-                border: 1px solid #2a2a3e;
-                border-radius: 8px;
-                color: #eee;
-                text-decoration: none;
-                transition: background 0.2s, border-color 0.2s;
-            }
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 32px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a3e;
+            border-radius: 16px;
+            color: #eee;
+            text-decoration: none;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .card:nth-child(1) { animation: fadeInUp 0.6s ease-out 0.2s both; }
+        .card:nth-child(2) { animation: fadeInUp 0.6s ease-out 0.4s both; }
 
-            a:hover {
-                background: #252540;
-                border-color: #6366f1;
-            }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #6366f1;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+        }
 
-            a .title {
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 4px;
-            }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+        }
+        .card-icon svg {
+            width: 28px;
+            height: 28px;
+        }
 
-            a .desc {
-                font-size: 13px;
-                color: #888;
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .card-desc {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.12);
+            color: #818cf8;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 32px;
+            font-size: 13px;
+            color: #444;
+        }
+
+        /* ── Animation ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-        </style>
-    </head>
-    <body>
-        <h1>Slider Components</h1>
-        <div class="links">
-            <a href="slider-demo.html">
-                <div class="title">Nested Group Sliders</div>
-                <div class="desc">巢狀 horizontal/vertical group 結構內的可拖曳 slider</div>
-            </a>
-            <a href="range-slider.html">
-                <div class="title">Range Slider</div>
-                <div class="desc">頭尾可拖曳、可整體移動的範圍選擇器</div>
-            </a>
-            <a href="touch-drag.html">
-                <div class="title">Touch Drag Utility</div>
-                <div class="desc">使用 Pointer Events 統一處理 mouse + touch 拖曳</div>
-            </a>
-            <a href="timeline.html">
-                <div class="title">Timeline Component</div>
-                <div class="desc">Range + Playhead 組合，播放頭限制在選取範圍內</div>
-            </a>
-            <a href="game.html">
-                <div class="title">點擊遊戲</div>
-                <div class="desc">測試 + 雲端儲存</div>
-            </a>
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .hero { padding: 40px 24px 32px; }
+            .hero-title { font-size: 28px; }
+            .hero-subtitle { font-size: 14px; }
+            .projects {
+                padding: 0 16px 48px;
+                grid-template-columns: 1fr;
+            }
+            .card { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <div class="hero-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
         </div>
-    </body>
+        <h1 class="hero-title">Web3D <span class="accent">Lab</span></h1>
+        <p class="hero-subtitle">互動元件與 3D 實驗專案</p>
+    </header>
+
+    <main class="projects">
+        <a href="components.html" class="card">
+            <div class="card-icon">
+                <svg viewBox="0 0 28 28" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round">
+                    <line x1="4" y1="8" x2="24" y2="8"/>
+                    <circle cx="16" cy="8" r="3" fill="#6366f1"/>
+                    <line x1="4" y1="20" x2="24" y2="20"/>
+                    <circle cx="10" cy="20" r="3" fill="#6366f1"/>
+                </svg>
+            </div>
+            <div class="card-title">UI 元件庫</div>
+            <div class="card-desc">Slider、Range Slider、Timeline 等互動元件展示，支援觸控操作</div>
+            <div class="card-tags">
+                <span class="tag">Pointer Events</span>
+                <span class="tag">Touch</span>
+                <span class="tag">Drag</span>
+            </div>
+        </a>
+
+        <a href="game.html" class="card">
+            <div class="card-icon">
+                <svg viewBox="0 0 28 28" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="6" width="16" height="16" rx="1" transform="rotate(10 14 14)"/>
+                    <rect x="8" y="8" width="12" height="12" rx="1" transform="rotate(-5 14 14)"/>
+                </svg>
+            </div>
+            <div class="card-title">點擊遊戲</div>
+            <div class="card-desc">Three.js 3D 點擊遊戲，搭配升級系統與雲端存檔</div>
+            <div class="card-tags">
+                <span class="tag">Three.js</span>
+                <span class="tag">雲端儲存</span>
+                <span class="tag">Idle Game</span>
+            </div>
+        </a>
+    </main>
+
+    <footer class="footer">
+        Built with vanilla HTML / CSS / JS
+    </footer>
+
+</body>
 </html>
