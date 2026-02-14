@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>UI 元件庫</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f0f1a;
+            color: #eee;
+            min-height: 100vh;
+        }
+
+        /* ── Nav ── */
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 24px;
+            background: #1a1a2e;
+            border-bottom: 1px solid #2a2a3e;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-back {
+            color: #6366f1;
+            text-decoration: none;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .nav-back:hover { text-decoration: underline; }
+        .nav-title {
+            font-size: 18px;
+            color: #eee;
+            font-weight: 600;
+        }
+
+        /* ── Accordion ── */
+        .sections { padding: 16px; max-width: 900px; margin: 0 auto; }
+
+        .accordion {
+            border: 1px solid #2a2a3e;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 16px 20px;
+            background: #1a1a2e;
+            border: none;
+            color: #eee;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            font-family: system-ui, sans-serif;
+            transition: background 0.2s;
+        }
+        .accordion-header:hover { background: #252540; }
+        .accordion-icon {
+            font-size: 12px;
+            transition: transform 0.3s;
+            color: #6366f1;
+        }
+        .accordion.collapsed .accordion-icon { transform: rotate(-90deg); }
+        .accordion-desc {
+            margin-left: auto;
+            font-size: 13px;
+            font-weight: 400;
+            color: #666;
+        }
+        .accordion-body {
+            max-height: 3000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            padding: 24px;
+            background: #0f0f1a;
+        }
+        .accordion.collapsed .accordion-body {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        /* ── Shared ── */
+        h3 { color: #6366f1; font-weight: 500; margin-bottom: 8px; }
+        .comp-info { font-size: 13px; color: #666; margin-bottom: 16px; }
+        .comp-output {
+            margin-top: 12px;
+            padding: 12px;
+            background: #1a1a2e;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .comp-output span { color: #6366f1; }
+
+        /* ── Section 1: Nested Slider (.ns-*) ── */
+        .ns-group {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .ns-group.horizontal { flex-direction: row; align-items: stretch; }
+        .ns-group.vertical { flex-direction: column; }
+
+        .ns-slider {
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            user-select: none;
+            touch-action: none;
+        }
+        .ns-group.horizontal > .ns-slider { width: 200px; height: 32px; }
+        .ns-group.vertical > .ns-slider { width: 32px; height: 150px; }
+
+        .ns-slider .ns-track {
+            position: absolute;
+            background: #4a5568;
+            border-radius: 2px;
+        }
+        .ns-group.horizontal > .ns-slider .ns-track {
+            left: 8px; right: 8px; top: 50%; height: 4px; transform: translateY(-50%);
+        }
+        .ns-group.vertical > .ns-slider .ns-track {
+            top: 8px; bottom: 8px; left: 50%; width: 4px; transform: translateX(-50%);
+        }
+
+        .ns-slider .ns-fill {
+            position: absolute;
+            background: #6366f1;
+            border-radius: 2px;
+        }
+        .ns-group.horizontal > .ns-slider .ns-fill {
+            left: 8px; top: 50%; height: 4px; transform: translateY(-50%);
+        }
+        .ns-group.vertical > .ns-slider .ns-fill {
+            bottom: 8px; left: 50%; width: 4px; transform: translateX(-50%);
+        }
+
+        .ns-slider .ns-thumb {
+            position: absolute;
+            width: 18px; height: 18px;
+            background: #6366f1;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: grab;
+            transition: transform 0.1s, box-shadow 0.1s;
+            touch-action: none;
+        }
+        .ns-slider .ns-thumb:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 12px rgba(99,102,241,0.5);
+        }
+        .ns-slider .ns-thumb.dragging {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 0 16px rgba(99,102,241,0.7);
+        }
+
+        .ns-slider .ns-value {
+            position: absolute;
+            font-size: 11px;
+            color: #aaa;
+            white-space: nowrap;
+        }
+        .ns-group.horizontal > .ns-slider .ns-value {
+            bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px;
+        }
+        .ns-group.vertical > .ns-slider .ns-value {
+            left: 100%; top: 50%; transform: translateY(-50%); margin-left: 8px;
+        }
+
+        .ns-label { font-size: 12px; color: #888; padding: 4px 8px; }
+
+        /* ── Section 2: Range Slider (.rs-*) ── */
+        .rs-container {
+            position: relative;
+            height: 48px;
+            user-select: none;
+            touch-action: none;
+        }
+        .rs-track {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            height: 6px;
+            background: #2a2a3e;
+            border-radius: 3px;
+            transform: translateY(-50%);
+        }
+        .rs-ticks {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            height: 16px;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px;
+            pointer-events: none;
+        }
+        .rs-tick { width: 1px; height: 100%; background: #3a3a4e; }
+
+        .rs-fill {
+            position: absolute;
+            top: 50%; height: 6px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 3px;
+            transform: translateY(-50%);
+            cursor: grab;
+            touch-action: none;
+        }
+        .rs-fill:hover { background: linear-gradient(90deg, #818cf8, #a78bfa); }
+        .rs-fill.dragging { cursor: grabbing; background: linear-gradient(90deg, #818cf8, #a78bfa); }
+
+        .rs-handle {
+            position: absolute;
+            top: 50%;
+            width: 20px; height: 20px;
+            background: #fff;
+            border: 3px solid #6366f1;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: ew-resize;
+            z-index: 10;
+            transition: transform 0.1s, box-shadow 0.1s;
+            touch-action: none;
+        }
+        .rs-handle:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 0 12px rgba(99,102,241,0.6);
+        }
+        .rs-handle.dragging {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 0 16px rgba(99,102,241,0.8);
+            border-color: #818cf8;
+        }
+        .rs-handle-label {
+            position: absolute;
+            bottom: 100%; left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            font-size: 12px; font-weight: 600;
+            color: #6366f1;
+            background: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .rs-handle:hover .rs-handle-label,
+        .rs-handle.dragging .rs-handle-label { opacity: 1; }
+
+        .rs-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* ── Section 3: Touch Drag (.td-*) ── */
+        .td-slider {
+            position: relative;
+            height: 48px;
+            background: #1a1a2e;
+            border-radius: 8px;
+        }
+        .td-slider .td-track {
+            position: absolute;
+            left: 12px; right: 12px; top: 50%;
+            height: 4px;
+            background: #2a2a3e;
+            border-radius: 2px;
+            transform: translateY(-50%);
+        }
+        .td-slider .td-thumb {
+            position: absolute;
+            top: 50%;
+            width: 24px; height: 24px;
+            background: #6366f1;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            touch-action: none;
+        }
+        .td-slider .td-thumb.dragging {
+            cursor: grabbing;
+            background: #818cf8;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        .td-range {
+            position: relative;
+            height: 48px;
+            background: #1a1a2e;
+            border-radius: 8px;
+        }
+        .td-range .td-track {
+            position: absolute;
+            left: 12px; right: 12px; top: 50%;
+            height: 4px;
+            background: #2a2a3e;
+            border-radius: 2px;
+            transform: translateY(-50%);
+        }
+        .td-range .td-fill {
+            position: absolute;
+            top: 50%; height: 4px;
+            background: #6366f1;
+            border-radius: 2px;
+            transform: translateY(-50%);
+            cursor: grab;
+            touch-action: none;
+        }
+        .td-range .td-fill.dragging { cursor: grabbing; background: #818cf8; }
+        .td-range .td-handle {
+            position: absolute;
+            top: 50%;
+            width: 24px; height: 24px;
+            background: #fff;
+            border: 3px solid #6366f1;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            touch-action: none;
+        }
+        .td-range .td-handle.dragging {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.15);
+            border-color: #818cf8;
+        }
+
+        .td-demo { margin-bottom: 32px; }
+
+        /* ── Section 4: Timeline (.tl-*) ── */
+        .tl-container {
+            position: relative;
+            height: 64px;
+            background: #1a1a2e;
+            border-radius: 8px;
+        }
+        .tl-track {
+            position: absolute;
+            left: 12px; right: 12px; top: 50%;
+            height: 8px;
+            background: #2a2a3e;
+            border-radius: 4px;
+            transform: translateY(-50%);
+        }
+        .tl-fill {
+            position: absolute;
+            top: 50%; height: 8px;
+            background: rgba(99,102,241,0.3);
+            border-radius: 4px;
+            transform: translateY(-50%);
+            cursor: grab;
+            border: 1px solid rgba(99,102,241,0.5);
+            touch-action: none;
+        }
+        .tl-fill.dragging { cursor: grabbing; background: rgba(99,102,241,0.4); }
+
+        .tl-handle {
+            position: absolute;
+            top: 50%;
+            width: 8px; height: 28px;
+            background: #6366f1;
+            border-radius: 4px;
+            transform: translate(-50%, -50%);
+            cursor: ew-resize;
+            z-index: 10;
+            touch-action: none;
+        }
+        .tl-handle:hover, .tl-handle.dragging { background: #818cf8; }
+        .tl-handle::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px; height: 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 1px;
+        }
+
+        .tl-playhead {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            cursor: grab;
+            touch-action: none;
+        }
+        .tl-playhead.dragging { cursor: grabbing; }
+        .tl-playhead-line {
+            position: absolute;
+            left: 50%; top: -20px; bottom: -20px;
+            width: 2px;
+            background: #f43f5e;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .tl-playhead-head {
+            position: relative;
+            width: 16px; height: 16px;
+            background: #f43f5e;
+            border: 2px solid #fff;
+            border-radius: 50%;
+        }
+        .tl-playhead.dragging .tl-playhead-head {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(244,63,94,0.6);
+        }
+
+        .tl-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px 0;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .tl-output {
+            margin-top: 16px;
+            padding: 16px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .tl-output-row { display: flex; gap: 24px; }
+        .tl-output .tl-label-text { color: #666; min-width: 80px; }
+        .tl-output .tl-value { color: #6366f1; }
+        .tl-output .tl-playhead-value { color: #f43f5e; }
+
+        .tl-hint {
+            font-size: 12px;
+            color: #f43f5e;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-top: 8px;
+        }
+        .tl-hint.show { opacity: 1; }
+
+        .tl-demo { margin-bottom: 48px; }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .sections { padding: 8px; }
+            .accordion-body { padding: 16px; }
+            .accordion-desc { display: none; }
+            .ns-group.horizontal { flex-direction: column; }
+            .ns-group.horizontal > .ns-slider { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="index.html" class="nav-back">← 返回首頁</a>
+    <span class="nav-title">UI 元件庫</span>
+</nav>
+
+<div class="sections">
+
+    <!-- ═══ Section 1: Nested Group Sliders ═══ -->
+    <section class="accordion" id="sec-slider">
+        <button class="accordion-header" aria-expanded="true">
+            <span class="accordion-icon">▼</span>
+            <span>Nested Group Sliders</span>
+            <span class="accordion-desc">巢狀 horizontal / vertical group 結構</span>
+        </button>
+        <div class="accordion-body">
+            <div class="ns-group horizontal">
+                <div class="ns-group vertical">
+                    <div class="ns-label">Channel A</div>
+                    <div class="ns-slider" data-min="0" data-max="100" data-value="30"></div>
+                    <div class="ns-slider" data-min="0" data-max="100" data-value="60"></div>
+                    <div class="ns-slider" data-min="0" data-max="100" data-value="45"></div>
+                </div>
+                <div class="ns-group vertical">
+                    <div class="ns-label">Channel B</div>
+                    <div class="ns-slider" data-min="-50" data-max="50" data-value="0"></div>
+                    <div class="ns-slider" data-min="0" data-max="1000" data-value="500"></div>
+                </div>
+                <div class="ns-group vertical">
+                    <div class="ns-label">Timeline</div>
+                    <div class="ns-group horizontal">
+                        <div class="ns-slider" data-min="0" data-max="60" data-value="15"></div>
+                        <div class="ns-slider" data-min="0" data-max="60" data-value="30"></div>
+                    </div>
+                    <div class="ns-group horizontal">
+                        <div class="ns-slider" data-min="0" data-max="100" data-value="75"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Section 2: Range Slider ═══ -->
+    <section class="accordion collapsed" id="sec-range">
+        <button class="accordion-header" aria-expanded="false">
+            <span class="accordion-icon">▼</span>
+            <span>Range Slider</span>
+            <span class="accordion-desc">頭尾可拖曳的範圍選擇器</span>
+        </button>
+        <div class="accordion-body">
+            <div>
+                <h3>Range Slider</h3>
+                <p class="comp-info">拖曳兩端調整範圍，拖曳中間區塊整體移動</p>
+                <div class="rs-container" id="rs1" data-min="0" data-max="100" data-start="25" data-end="75">
+                    <div class="rs-track"></div>
+                    <div class="rs-ticks"></div>
+                    <div class="rs-fill"></div>
+                    <div class="rs-handle rs-handle-start"><div class="rs-handle-label"></div></div>
+                    <div class="rs-handle rs-handle-end"><div class="rs-handle-label"></div></div>
+                </div>
+                <div class="rs-labels"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+                <div class="comp-output" id="rs1-out">
+                    Range: <span class="rs-out-start">25</span> — <span class="rs-out-end">75</span>
+                    &nbsp;|&nbsp; Duration: <span class="rs-out-dur">50</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <h3>Timeline (0:00 - 10:00)</h3>
+                <p class="comp-info">時間軸範例，單位為秒</p>
+                <div class="rs-container" id="rs2" data-min="0" data-max="600" data-start="120" data-end="360">
+                    <div class="rs-track"></div>
+                    <div class="rs-ticks"></div>
+                    <div class="rs-fill"></div>
+                    <div class="rs-handle rs-handle-start"><div class="rs-handle-label"></div></div>
+                    <div class="rs-handle rs-handle-end"><div class="rs-handle-label"></div></div>
+                </div>
+                <div class="rs-labels"><span>0:00</span><span>2:30</span><span>5:00</span><span>7:30</span><span>10:00</span></div>
+                <div class="comp-output" id="rs2-out">
+                    Range: <span class="rs-out-start">2:00</span> — <span class="rs-out-end">6:00</span>
+                    &nbsp;|&nbsp; Duration: <span class="rs-out-dur">4:00</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Section 3: Touch Drag ═══ -->
+    <section class="accordion collapsed" id="sec-touch">
+        <button class="accordion-header" aria-expanded="false">
+            <span class="accordion-icon">▼</span>
+            <span>Touch Drag</span>
+            <span class="accordion-desc">Pointer Events 統一 mouse + touch</span>
+        </button>
+        <div class="accordion-body">
+            <div class="td-demo">
+                <h3>Simple Slider (Touch + Mouse)</h3>
+                <div class="td-slider" id="td-slider1">
+                    <div class="td-track"></div>
+                    <div class="td-thumb"></div>
+                </div>
+                <div class="comp-output">Value: <span id="td-out1">50</span></div>
+            </div>
+
+            <div class="td-demo">
+                <h3>Range Slider (Touch + Mouse)</h3>
+                <div class="td-range" id="td-slider2">
+                    <div class="td-track"></div>
+                    <div class="td-fill"></div>
+                    <div class="td-handle td-handle-start"></div>
+                    <div class="td-handle td-handle-end"></div>
+                </div>
+                <div class="comp-output">Range: <span id="td-out2-start">25</span> — <span id="td-out2-end">75</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Section 4: Timeline ═══ -->
+    <section class="accordion collapsed" id="sec-timeline">
+        <button class="accordion-header" aria-expanded="false">
+            <span class="accordion-icon">▼</span>
+            <span>Timeline</span>
+            <span class="accordion-desc">Range + Playhead 組合播放器</span>
+        </button>
+        <div class="accordion-body">
+            <div class="tl-demo">
+                <h3>Timeline Component</h3>
+                <p class="comp-info">藍色區塊 = 選取範圍（可整體拖曳或調整頭尾）｜紅色 = 播放頭（限制在範圍內）</p>
+                <div class="tl-container" id="tl1" data-min="0" data-max="100">
+                    <div class="tl-track"></div>
+                    <div class="tl-fill"></div>
+                    <div class="tl-handle tl-start"></div>
+                    <div class="tl-handle tl-end"></div>
+                    <div class="tl-playhead">
+                        <div class="tl-playhead-line"></div>
+                        <div class="tl-playhead-head"></div>
+                    </div>
+                </div>
+                <div class="tl-labels"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+                <div class="tl-hint" id="tl-hint1">⚠ 播放頭被限制在選取範圍內</div>
+                <div class="tl-output">
+                    <div class="tl-output-row">
+                        <span class="tl-label-text">Range:</span>
+                        <span class="tl-value"><span id="tl1-start">20</span> — <span id="tl1-end">80</span></span>
+                    </div>
+                    <div class="tl-output-row">
+                        <span class="tl-label-text">Playhead:</span>
+                        <span class="tl-playhead-value" id="tl1-playhead">50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tl-demo">
+                <h3>Timeline (Time Format 0:00 - 5:00)</h3>
+                <p class="comp-info">時間軸格式範例，單位為秒</p>
+                <div class="tl-container" id="tl2" data-min="0" data-max="300">
+                    <div class="tl-track"></div>
+                    <div class="tl-fill"></div>
+                    <div class="tl-handle tl-start"></div>
+                    <div class="tl-handle tl-end"></div>
+                    <div class="tl-playhead">
+                        <div class="tl-playhead-line"></div>
+                        <div class="tl-playhead-head"></div>
+                    </div>
+                </div>
+                <div class="tl-labels"><span>0:00</span><span>1:15</span><span>2:30</span><span>3:45</span><span>5:00</span></div>
+                <div class="tl-hint" id="tl-hint2">⚠ 播放頭被限制在選取範圍內</div>
+                <div class="tl-output">
+                    <div class="tl-output-row">
+                        <span class="tl-label-text">Range:</span>
+                        <span class="tl-value"><span id="tl2-start">0:30</span> — <span id="tl2-end">4:00</span></span>
+                    </div>
+                    <div class="tl-output-row">
+                        <span class="tl-label-text">Playhead:</span>
+                        <span class="tl-playhead-value" id="tl2-playhead">2:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// Shared: makeDraggable (Pointer Events)
+// ═══════════════════════════════════════
+function makeDraggable(el, callbacks) {
+    const start = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        el.classList.add('dragging');
+        el.setPointerCapture(e.pointerId);
+        callbacks.onStart?.(e);
+    };
+    const move = (e) => {
+        if (!el.classList.contains('dragging')) return;
+        callbacks.onMove?.(e);
+    };
+    const end = (e) => {
+        el.classList.remove('dragging');
+        el.releasePointerCapture(e.pointerId);
+        callbacks.onEnd?.(e);
+    };
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+}
+
+// ═══════════════════════════════════════
+// Accordion Toggle
+// ═══════════════════════════════════════
+document.querySelectorAll('.accordion-header').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const section = btn.closest('.accordion');
+        const wasCollapsed = section.classList.contains('collapsed');
+        section.classList.toggle('collapsed');
+        btn.setAttribute('aria-expanded', wasCollapsed ? 'true' : 'false');
+    });
+});
+
+// ═══════════════════════════════════════
+// Section 1: Nested Slider (Pointer Events)
+// ═══════════════════════════════════════
+class Slider {
+    constructor(element) {
+        this.el = element;
+        this.min = parseFloat(element.dataset.min) || 0;
+        this.max = parseFloat(element.dataset.max) || 100;
+        this.value = parseFloat(element.dataset.value) || this.min;
+        this.isVertical = element.closest('.ns-group.vertical') !== null
+            && element.parentElement.classList.contains('vertical');
+        this.render();
+        this.bindEvents();
+        this.updatePosition();
+    }
+
+    render() {
+        this.el.innerHTML = `
+            <div class="ns-track"></div>
+            <div class="ns-fill"></div>
+            <div class="ns-thumb"></div>
+            <div class="ns-value">${this.value.toFixed(0)}</div>
+        `;
+        this.thumb = this.el.querySelector('.ns-thumb');
+        this.fill = this.el.querySelector('.ns-fill');
+        this.label = this.el.querySelector('.ns-value');
+    }
+
+    bindEvents() {
+        makeDraggable(this.thumb, {
+            onMove: (e) => this.drag(e)
+        });
+        // Click-to-jump on track
+        this.el.addEventListener('pointerdown', (e) => {
+            if (e.target !== this.thumb) {
+                this.drag(e);
+            }
+        });
+    }
+
+    drag(e) {
+        const rect = this.el.getBoundingClientRect();
+        let ratio;
+        if (this.isVertical) {
+            ratio = 1 - (e.clientY - rect.top - 8) / (rect.height - 16);
+        } else {
+            ratio = (e.clientX - rect.left - 8) / (rect.width - 16);
+        }
+        ratio = Math.max(0, Math.min(1, ratio));
+        this.value = this.min + ratio * (this.max - this.min);
+        this.el.dataset.value = this.value;
+        this.updatePosition();
+        this.el.dispatchEvent(new CustomEvent('slider-change', {
+            detail: { value: this.value }
+        }));
+    }
+
+    updatePosition() {
+        const ratio = (this.value - this.min) / (this.max - this.min);
+        if (this.isVertical) {
+            const pos = 8 + (1 - ratio) * (this.el.offsetHeight - 16);
+            this.thumb.style.top = `${pos}px`;
+            this.thumb.style.left = '50%';
+            this.thumb.style.transform = 'translate(-50%, -50%)';
+            this.fill.style.height = `${ratio * (this.el.offsetHeight - 16)}px`;
+        } else {
+            const pos = 8 + ratio * (this.el.offsetWidth - 16);
+            this.thumb.style.left = `${pos}px`;
+            this.thumb.style.top = '50%';
+            this.thumb.style.transform = 'translate(-50%, -50%)';
+            this.fill.style.width = `${ratio * (this.el.offsetWidth - 16)}px`;
+        }
+        this.label.textContent = this.value.toFixed(0);
+    }
+}
+
+// ═══════════════════════════════════════
+// Section 2: Range Slider (Pointer Events)
+// ═══════════════════════════════════════
+class RangeSlider {
+    constructor(el, formatter = (v) => v.toFixed(0)) {
+        this.el = el;
+        this.formatter = formatter;
+        this.min = parseFloat(el.dataset.min) || 0;
+        this.max = parseFloat(el.dataset.max) || 100;
+        this.start = parseFloat(el.dataset.start) || this.min;
+        this.end = parseFloat(el.dataset.end) || this.max;
+
+        this.fill = el.querySelector('.rs-fill');
+        this.handleStart = el.querySelector('.rs-handle-start');
+        this.handleEnd = el.querySelector('.rs-handle-end');
+        this.labelStart = this.handleStart.querySelector('.rs-handle-label');
+        this.labelEnd = this.handleEnd.querySelector('.rs-handle-label');
+        this.output = el.parentElement.querySelector('.comp-output');
+
+        this.renderTicks();
+        this.bindEvents();
+        this.update();
+        window.addEventListener('resize', () => this.update());
+    }
+
+    renderTicks() {
+        const ticks = this.el.querySelector('.rs-ticks');
+        for (let i = 0; i <= 20; i++) {
+            const tick = document.createElement('div');
+            tick.className = 'rs-tick';
+            ticks.appendChild(tick);
+        }
+    }
+
+    bindEvents() {
+        // Start handle
+        makeDraggable(this.handleStart, {
+            onStart: (e) => {
+                this._startX = e.clientX;
+                this._origStart = this.start;
+            },
+            onMove: (e) => {
+                const rect = this.el.getBoundingClientRect();
+                const dValue = (e.clientX - this._startX) / rect.width * (this.max - this.min);
+                this.start = Math.max(this.min, Math.min(this.end - 1, this._origStart + dValue));
+                this.update();
+                this.dispatch();
+            }
+        });
+
+        // End handle
+        makeDraggable(this.handleEnd, {
+            onStart: (e) => {
+                this._startX = e.clientX;
+                this._origEnd = this.end;
+            },
+            onMove: (e) => {
+                const rect = this.el.getBoundingClientRect();
+                const dValue = (e.clientX - this._startX) / rect.width * (this.max - this.min);
+                this.end = Math.max(this.start + 1, Math.min(this.max, this._origEnd + dValue));
+                this.update();
+                this.dispatch();
+            }
+        });
+
+        // Fill drag (whole range)
+        makeDraggable(this.fill, {
+            onStart: (e) => {
+                this._startX = e.clientX;
+                this._origStart = this.start;
+                this._origEnd = this.end;
+                this._range = this.end - this.start;
+            },
+            onMove: (e) => {
+                const rect = this.el.getBoundingClientRect();
+                const dValue = (e.clientX - this._startX) / rect.width * (this.max - this.min);
+                let newStart = this._origStart + dValue;
+                let newEnd = this._origEnd + dValue;
+                if (newStart < this.min) { newStart = this.min; newEnd = this.min + this._range; }
+                if (newEnd > this.max) { newEnd = this.max; newStart = this.max - this._range; }
+                this.start = newStart;
+                this.end = newEnd;
+                this.update();
+                this.dispatch();
+            }
+        });
+    }
+
+    update() {
+        const startPct = ((this.start - this.min) / (this.max - this.min)) * 100;
+        const endPct = ((this.end - this.min) / (this.max - this.min)) * 100;
+        this.handleStart.style.left = `${startPct}%`;
+        this.handleEnd.style.left = `${endPct}%`;
+        this.fill.style.left = `${startPct}%`;
+        this.fill.style.width = `${endPct - startPct}%`;
+        this.labelStart.textContent = this.formatter(this.start);
+        this.labelEnd.textContent = this.formatter(this.end);
+
+        if (this.output) {
+            this.output.querySelector('.rs-out-start').textContent = this.formatter(this.start);
+            this.output.querySelector('.rs-out-end').textContent = this.formatter(this.end);
+            this.output.querySelector('.rs-out-dur').textContent = this.formatter(this.end - this.start);
+        }
+    }
+
+    dispatch() {
+        this.el.dispatchEvent(new CustomEvent('range-change', {
+            detail: { start: this.start, end: this.end }
+        }));
+    }
+}
+
+// ═══════════════════════════════════════
+// Section 3: Touch Drag Demos
+// ═══════════════════════════════════════
+// Demo 1: Simple Slider
+{
+    const slider = document.getElementById('td-slider1');
+    const thumb = slider.querySelector('.td-thumb');
+    const out = document.getElementById('td-out1');
+    let value = 50;
+
+    const update = () => {
+        const rect = slider.getBoundingClientRect();
+        const width = rect.width - 24;
+        const px = 12 + (value / 100) * width;
+        thumb.style.left = `${px}px`;
+        out.textContent = value.toFixed(0);
+    };
+
+    update();
+    window.addEventListener('resize', update);
+
+    makeDraggable(thumb, {
+        onMove(e) {
+            const rect = slider.getBoundingClientRect();
+            const x = e.clientX - rect.left - 12;
+            const width = rect.width - 24;
+            value = Math.max(0, Math.min(100, (x / width) * 100));
+            update();
+        }
+    });
+}
+
+// Demo 2: Range Slider
+{
+    const slider = document.getElementById('td-slider2');
+    const fill = slider.querySelector('.td-fill');
+    const handleStart = slider.querySelector('.td-handle-start');
+    const handleEnd = slider.querySelector('.td-handle-end');
+    const outStart = document.getElementById('td-out2-start');
+    const outEnd = document.getElementById('td-out2-end');
+
+    let start = 25, end = 75;
+
+    const update = () => {
+        const rect = slider.getBoundingClientRect();
+        const width = rect.width - 24;
+        const startPx = 12 + (start / 100) * width;
+        const endPx = 12 + (end / 100) * width;
+        handleStart.style.left = `${startPx}px`;
+        handleEnd.style.left = `${endPx}px`;
+        fill.style.left = `${startPx}px`;
+        fill.style.width = `${endPx - startPx}px`;
+        outStart.textContent = start.toFixed(0);
+        outEnd.textContent = end.toFixed(0);
+    };
+
+    update();
+    window.addEventListener('resize', update);
+
+    const getValueFromX = (clientX) => {
+        const rect = slider.getBoundingClientRect();
+        const x = clientX - rect.left - 12;
+        const width = rect.width - 24;
+        return Math.max(0, Math.min(100, (x / width) * 100));
+    };
+
+    makeDraggable(handleStart, {
+        onMove(e) {
+            start = Math.min(end - 1, getValueFromX(e.clientX));
+            update();
+        }
+    });
+
+    makeDraggable(handleEnd, {
+        onMove(e) {
+            end = Math.max(start + 1, getValueFromX(e.clientX));
+            update();
+        }
+    });
+
+    let dragOffset = 0;
+    makeDraggable(fill, {
+        onStart(e) { dragOffset = getValueFromX(e.clientX) - start; },
+        onMove(e) {
+            const range = end - start;
+            let newStart = getValueFromX(e.clientX) - dragOffset;
+            if (newStart < 0) newStart = 0;
+            if (newStart + range > 100) newStart = 100 - range;
+            start = newStart;
+            end = newStart + range;
+            update();
+        }
+    });
+}
+
+// ═══════════════════════════════════════
+// Section 4: Timeline
+// ═══════════════════════════════════════
+class Timeline {
+    constructor(el, options = {}) {
+        this.el = el;
+        this.min = parseFloat(el.dataset.min) || 0;
+        this.max = parseFloat(el.dataset.max) || 100;
+        this.formatter = options.formatter || (v => v.toFixed(0));
+        this.outputs = options.outputs || {};
+        this.hintEl = options.hintEl;
+
+        this.rangeStart = options.rangeStart ?? this.min + (this.max - this.min) * 0.2;
+        this.rangeEnd = options.rangeEnd ?? this.min + (this.max - this.min) * 0.8;
+        this.playhead = options.playhead ?? (this.rangeStart + this.rangeEnd) / 2;
+
+        this.fill = el.querySelector('.tl-fill');
+        this.handleStart = el.querySelector('.tl-start');
+        this.handleEnd = el.querySelector('.tl-end');
+        this.playheadEl = el.querySelector('.tl-playhead');
+
+        this.padding = 12;
+
+        this.bindEvents();
+        this.update();
+        window.addEventListener('resize', () => this.update());
+    }
+
+    getWidth() { return this.el.getBoundingClientRect().width - this.padding * 2; }
+
+    valueToPx(value) {
+        const ratio = (value - this.min) / (this.max - this.min);
+        return this.padding + ratio * this.getWidth();
+    }
+
+    pxToValue(clientX) {
+        const rect = this.el.getBoundingClientRect();
+        const x = clientX - rect.left - this.padding;
+        const ratio = x / this.getWidth();
+        return this.min + Math.max(0, Math.min(1, ratio)) * (this.max - this.min);
+    }
+
+    clampPlayhead() {
+        const before = this.playhead;
+        this.playhead = Math.max(this.rangeStart, Math.min(this.rangeEnd, this.playhead));
+        return before !== this.playhead;
+    }
+
+    showHint() {
+        if (this.hintEl) {
+            this.hintEl.classList.add('show');
+            clearTimeout(this.hintTimeout);
+            this.hintTimeout = setTimeout(() => {
+                this.hintEl.classList.remove('show');
+            }, 1500);
+        }
+    }
+
+    update() {
+        const startPx = this.valueToPx(this.rangeStart);
+        const endPx = this.valueToPx(this.rangeEnd);
+        const playheadPx = this.valueToPx(this.playhead);
+
+        this.handleStart.style.left = `${startPx}px`;
+        this.handleEnd.style.left = `${endPx}px`;
+        this.fill.style.left = `${startPx}px`;
+        this.fill.style.width = `${endPx - startPx}px`;
+        this.playheadEl.style.left = `${playheadPx}px`;
+
+        if (this.outputs.start) this.outputs.start.textContent = this.formatter(this.rangeStart);
+        if (this.outputs.end) this.outputs.end.textContent = this.formatter(this.rangeEnd);
+        if (this.outputs.playhead) this.outputs.playhead.textContent = this.formatter(this.playhead);
+    }
+
+    bindEvents() {
+        makeDraggable(this.handleStart, {
+            onMove: (e) => {
+                this.rangeStart = Math.max(this.min, Math.min(this.rangeEnd - 1, this.pxToValue(e.clientX)));
+                if (this.clampPlayhead()) this.showHint();
+                this.update();
+            }
+        });
+
+        makeDraggable(this.handleEnd, {
+            onMove: (e) => {
+                this.rangeEnd = Math.max(this.rangeStart + 1, Math.min(this.max, this.pxToValue(e.clientX)));
+                if (this.clampPlayhead()) this.showHint();
+                this.update();
+            }
+        });
+
+        let dragOffset = 0;
+        makeDraggable(this.fill, {
+            onStart: (e) => { dragOffset = this.pxToValue(e.clientX) - this.rangeStart; },
+            onMove: (e) => {
+                const range = this.rangeEnd - this.rangeStart;
+                let newStart = this.pxToValue(e.clientX) - dragOffset;
+                if (newStart < this.min) newStart = this.min;
+                if (newStart + range > this.max) newStart = this.max - range;
+                const playheadRatio = (this.playhead - this.rangeStart) / range;
+                this.rangeStart = newStart;
+                this.rangeEnd = newStart + range;
+                this.playhead = this.rangeStart + playheadRatio * range;
+                this.update();
+            }
+        });
+
+        makeDraggable(this.playheadEl, {
+            onMove: (e) => {
+                const value = this.pxToValue(e.clientX);
+                this.playhead = Math.max(this.rangeStart, Math.min(this.rangeEnd, value));
+                this.update();
+            }
+        });
+    }
+}
+
+// ═══════════════════════════════════════
+// Init All
+// ═══════════════════════════════════════
+
+// Time formatter
+const timeFormatter = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+// Section 1: Nested Sliders
+document.querySelectorAll('#sec-slider .ns-slider').forEach(el => new Slider(el));
+
+// Section 2: Range Sliders
+new RangeSlider(document.getElementById('rs1'));
+new RangeSlider(document.getElementById('rs2'), timeFormatter);
+
+// Section 4: Timelines
+new Timeline(document.getElementById('tl1'), {
+    outputs: {
+        start: document.getElementById('tl1-start'),
+        end: document.getElementById('tl1-end'),
+        playhead: document.getElementById('tl1-playhead')
+    },
+    hintEl: document.getElementById('tl-hint1')
+});
+
+new Timeline(document.getElementById('tl2'), {
+    formatter: timeFormatter,
+    rangeStart: 30,
+    rangeEnd: 240,
+    playhead: 120,
+    outputs: {
+        start: document.getElementById('tl2-start'),
+        end: document.getElementById('tl2-end'),
+        playhead: document.getElementById('tl2-playhead')
+    },
+    hintEl: document.getElementById('tl-hint2')
+});
+</script>
+</body>
+</html>
