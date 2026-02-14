@@ -28,6 +28,7 @@
       .hud-val { color: #ffd700; font-weight: 700; }
       .hud-val.cps { color: #4ade80; }
       .hud-val.power { color: #818cf8; }
+      .hud-val.multiplier { color: #f472b6; }
 
       /* ── Save/Load ── */
       #save-panel {
@@ -186,6 +187,10 @@
         <span class="hud-label">點擊力</span>
         <span class="hud-val power" id="clickPower">1</span>
       </div>
+      <div class="hud-stat">
+        <span class="hud-label">倍率</span>
+        <span class="hud-val multiplier" id="coinMultiplier">×1</span>
+      </div>
     </div>
 
     <!-- Save/Load -->
@@ -219,10 +224,12 @@
         coins: 0,
         clickPower: 1,
         cps: 0,
+        coinMultiplier: 1,
         upgrades: [
           { name: '自動礦工', cost: 10, cpsBonus: 1, owned: 0 },
           { name: '強化點擊', cost: 50, clickBonus: 1, owned: 0 },
           { name: '礦場', cost: 200, cpsBonus: 5, owned: 0 },
+          { name: '金幣倍率', cost: 500, multiplierBonus: 0.5, owned: 0 },
         ]
       };
 
@@ -262,10 +269,11 @@
         const intersects = raycaster.intersectObject(mainCube);
 
         if (intersects.length > 0) {
-          state.coins += state.clickPower;
+          const earned = state.clickPower * state.coinMultiplier;
+          state.coins += earned;
           updateUI();
           animateCubeClick();
-          showClickFeedback(event.clientX, event.clientY);
+          showClickFeedback(event.clientX, event.clientY, earned);
         }
       }
 
@@ -293,10 +301,10 @@
       }
 
       // ═══ Floating "+N" Feedback ═══
-      function showClickFeedback(x, y) {
+      function showClickFeedback(x, y, amount) {
         const el = document.createElement('div');
         el.className = 'click-feedback';
-        el.textContent = `+${state.clickPower}`;
+        el.textContent = `+${Math.floor(amount)}`;
         el.style.left = `${x - 15}px`;
         el.style.top = `${y - 30}px`;
         document.body.appendChild(el);
@@ -313,9 +321,10 @@
           btn.className = 'upgrade-btn';
           btn.dataset.index = i;
 
-          const effectText = upgrade.cpsBonus
-            ? `每秒 +${upgrade.cpsBonus} 金幣`
-            : `點擊力 +${upgrade.clickBonus}`;
+          let effectText;
+          if (upgrade.cpsBonus) effectText = `每秒 +${upgrade.cpsBonus} 金幣`;
+          else if (upgrade.clickBonus) effectText = `點擊力 +${upgrade.clickBonus}`;
+          else if (upgrade.multiplierBonus) effectText = `倍率 +${upgrade.multiplierBonus}×`;
 
           btn.innerHTML = `
             <div class="upgrade-name">${upgrade.name}</div>
@@ -341,6 +350,7 @@
           upgrade.cost = Math.floor(upgrade.cost * 1.5);
           if (upgrade.cpsBonus) state.cps += upgrade.cpsBonus;
           if (upgrade.clickBonus) state.clickPower += upgrade.clickBonus;
+          if (upgrade.multiplierBonus) state.coinMultiplier += upgrade.multiplierBonus;
           updateUI();
         }
       }
@@ -351,7 +361,7 @@
         const delta = (currentTime - lastTime) / 1000;
         lastTime = currentTime;
         if (state.cps > 0) {
-          state.coins += state.cps * delta;
+          state.coins += state.cps * delta * state.coinMultiplier;
           updateUI();
         }
       }
@@ -361,6 +371,7 @@
         document.getElementById('coins').textContent = Math.floor(state.coins);
         document.getElementById('cps').textContent = state.cps;
         document.getElementById('clickPower').textContent = state.clickPower;
+        document.getElementById('coinMultiplier').textContent = `×${state.coinMultiplier}`;
 
         // Update upgrade buttons
         const buttons = document.querySelectorAll('.upgrade-btn');
@@ -373,9 +384,10 @@
           btn.querySelector('.upgrade-cost').textContent = `費用: ${upgrade.cost}`;
           btn.querySelector('.upgrade-owned').textContent = `已擁有: ${upgrade.owned}`;
 
-          const effectText = upgrade.cpsBonus
-            ? `每秒 +${upgrade.cpsBonus} 金幣`
-            : `點擊力 +${upgrade.clickBonus}`;
+          let effectText;
+          if (upgrade.cpsBonus) effectText = `每秒 +${upgrade.cpsBonus} 金幣`;
+          else if (upgrade.clickBonus) effectText = `點擊力 +${upgrade.clickBonus}`;
+          else if (upgrade.multiplierBonus) effectText = `倍率 +${upgrade.multiplierBonus}×`;
           btn.querySelector('.upgrade-info').textContent = effectText;
         });
       }
@@ -416,6 +428,7 @@
           coins: state.coins,
           clickPower: state.clickPower,
           cps: state.cps,
+          coinMultiplier: state.coinMultiplier,
           upgrades: state.upgrades
         };
 
@@ -461,6 +474,7 @@
               state.coins = saveData.coins || 0;
               state.clickPower = saveData.clickPower || 1;
               state.cps = saveData.cps || 0;
+              state.coinMultiplier = saveData.coinMultiplier || 1;
               state.upgrades = saveData.upgrades || state.upgrades;
               renderUpgradeButtons();
               updateUI();
