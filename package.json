@@ -1,0 +1,17 @@
+{
+  "name": "web3d",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Web3D Lab - Interactive 3D web experiments",
+  "scripts": {
+    "lint:js": "eslint 'js/**/*.js'",
+    "lint:html": "htmlhint '*.html'",
+    "lint": "npm run lint:js && npm run lint:html",
+    "test": "node --test 'tests/**/*.test.js'"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "htmlhint": "^1"
+  }
+}
